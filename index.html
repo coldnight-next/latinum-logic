@@ -142,10 +142,10 @@
       color: rgba(255, 231, 149, 0.8);
     }
     .council {
-      width: min(1100px, 100%);
+      width: min(1400px, 100%);
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 2rem;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 3rem;
       z-index: 1;
     }
     .panel {
@@ -307,26 +307,33 @@
     }
     .result-card {
       position: relative;
-      padding: 1.5rem;
-      border-radius: 16px;
-      background: rgba(9, 6, 14, 0.75);
-      border: 1px solid rgba(255, 231, 149, 0.2);
-      box-shadow: inset 0 0 0 1px rgba(255, 231, 149, 0.08);
-      min-height: 180px;
+      padding: 2.5rem;
+      border-radius: 20px;
+      background: rgba(9, 6, 14, 0.85);
+      border: 2px solid rgba(255, 231, 149, 0.4);
+      box-shadow: inset 0 0 0 1px rgba(255, 231, 149, 0.15), 0 8px 32px rgba(255, 138, 61, 0.3);
+      min-height: 280px;
+      margin: 0 auto;
+      max-width: 600px;
     }
     .rule-number {
-      margin: 0;
+      margin: 0 0 1rem;
       font-family: 'Orbitron', 'Share Tech Mono', sans-serif;
-      letter-spacing: 0.12em;
+      letter-spacing: 0.15em;
       text-transform: uppercase;
-      font-size: 0.85rem;
-      color: rgba(255, 231, 149, 0.75);
+      font-size: 1rem;
+      color: var(--latinum);
+      font-weight: bold;
+      text-shadow: 0 0 8px rgba(255, 231, 149, 0.5);
     }
     .rule-text {
-      margin: 1rem 0 0;
-      font-size: 1.2rem;
-      line-height: 1.6;
+      margin: 1.5rem 0 0;
+      font-size: 1.6rem;
+      line-height: 1.7;
       color: var(--latinum-bright);
+      font-weight: 600;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+      font-style: italic;
     }
     .slogan {
       margin-top: 1rem;
@@ -448,11 +455,12 @@
       margin-top: 1rem;
     }
     .rule-card {
-      animation: rule-appear 0.5s ease-out;
+      animation: rule-reveal 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
-    @keyframes rule-appear {
-      0% { opacity: 0; transform: translateY(20px); }
-      100% { opacity: 1; transform: translateY(0); }
+    @keyframes rule-reveal {
+      0% { opacity: 0; transform: scale(0.8) translateY(50px) rotateX(45deg); }
+      50% { opacity: 0.7; transform: scale(1.05) translateY(-10px) rotateX(0deg); }
+      100% { opacity: 1; transform: scale(1) translateY(0) rotateX(0deg); }
     }
     .favorite-pulse {
       animation: favorite-pulse 0.6s ease-out;
@@ -471,9 +479,50 @@
       text-align: center;
       z-index: 1;
     }
-    @media (max-width: 720px) {
+    @media (max-width: 1400px) {
+      .council {
+        width: min(1200px, 100%);
+        gap: 2rem;
+      }
+      .result-card {
+        max-width: 500px;
+        padding: 2rem;
+        min-height: 240px;
+      }
+      .rule-text {
+        font-size: 1.4rem;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .council {
+        width: min(100%, 100vw - 2rem);
+        gap: 1.5rem;
+        grid-template-columns: 1fr;
+      }
+      .result-card {
+        max-width: 100%;
+        padding: 1.5rem;
+        min-height: 200px;
+      }
+      .rule-text {
+        font-size: 1.3rem;
+      }
+      .rule-number {
+        font-size: 0.9rem;
+      }
+    }
+
+    @media (max-width: 480px) {
       body {
         padding: 2rem 1rem 3rem;
+      }
+      .result-card {
+        padding: 1.25rem;
+        border-radius: 16px;
+      }
+      .rule-text {
+        font-size: 1.2rem;
       }
       .controls {
         flex-direction: column;
