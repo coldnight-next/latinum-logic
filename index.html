@@ -4,9 +4,38 @@
   <meta charset='UTF-8'>
   <meta name='viewport' content='width=device-width, initial-scale=1.0'>
   <title>Latinum Logic | Ferengi Rule Oracle</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="favicon.ico" type="image/x-icon">
+  <meta name="description" content="Consult the 286 Rules of Acquisition for ultimate Ferengi wisdom. Ancient profit principles perfect for modern business and crypto traders.">
+  <meta name="keywords" content="Ferengi, Star Trek, Rules of Acquisition, business wisdom, profit, Latinum, crypto trading, entrepreneurship">
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://latinum-logic.netlify.app/">
+  <meta property="og:title" content="Latinum Logic | Ferengi Rule Oracle">
+  <meta property="og:description" content="Consult the 286 Rules of Acquisition for ultimate Ferengi wisdom. Ancient profit principles perfect for modern business and crypto traders.">
+  <meta property="og:image" content="https://latinum-logic.netlify.app/preview-image.jpg">
+
+  <!-- Twitter -->
+  <meta property="twitter:card" content="summary_large_image">
+  <meta property="twitter:url" content="https://latinum-logic.netlify.app/">
+  <meta property="twitter:title" content="Latinum Logic | Ferengi Rule Oracle">
+  <meta property="twitter:description" content="Consult the 286 Rules of Acquisition for ultimate Ferengi wisdom. Ancient profit principles perfect for modern business and crypto traders.">
+  <meta property="twitter:image" content="https://latinum-logic.netlify.app/preview-image.jpg">
+
   <link rel='preconnect' href='https://fonts.googleapis.com'>
   <link rel='preconnect' href='https://fonts.gstatic.com' crossorigin>
   <link href='https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700&family=Share+Tech+Mono&display=swap' rel='stylesheet'>
+
+  <!-- Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=GA_MEASUREMENT_ID"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'GA_MEASUREMENT_ID');
+  </script>
+
   <style>
     :root {
       color-scheme: dark;
@@ -375,6 +404,21 @@
       background: var(--latinum);
       color: var(--ferengi-ink);
     }
+    .rule-card {
+      animation: rule-appear 0.5s ease-out;
+    }
+    @keyframes rule-appear {
+      0% { opacity: 0; transform: translateY(20px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+    .favorite-pulse {
+      animation: favorite-pulse 0.6s ease-out;
+    }
+    @keyframes favorite-pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.2); }
+      100% { transform: scale(1); }
+    }
     footer {
       margin-top: 3rem;
       font-size: 0.75rem;
@@ -400,7 +444,7 @@
 <body>
   <header class='masthead'>
     <div class='header-controls'>
-      <button id='theme-toggle' class='theme-btn' aria-label='Toggle theme'>🌙</button>
+      <button id='theme-toggle' class='theme-btn' aria-label='Toggle between dark and light theme'>🌙</button>
     </div>
     <h1>Latinum Logic</h1>
     <p class='tagline'>Submit your scheme. Receive Ferengi-sanctioned wisdom.</p>
@@ -409,7 +453,7 @@
       <p id='daily-rule-text'>Loading daily wisdom...</p>
     </div>
   </header>
-  <main class='council'>
+  <main class='council' role='main'>
     <section class='panel'>
       <h2>State Your Question</h2>
       <div id='filters'>
@@ -443,6 +487,8 @@
         <div class='share-buttons'>
           <button class='share-btn' data-platform='twitter'>🐦 Share on Twitter</button>
           <button class='share-btn' data-platform='facebook'>📘 Share on Facebook</button>
+          <button class='share-btn' data-platform='linkedin'>💼 Share on LinkedIn</button>
+          <button class='share-btn' data-platform='reddit'>🟠 Share on Reddit</button>
         </div>
       </div>
       <p class='slogan'>May your profits be eternal.</p>
@@ -453,7 +499,11 @@
     </section>
   </main>
   <footer>
-    <p>&copy; 2024 Ferengi Commerce Authority. All Rights Reserved.</p>
+    <p>&copy; 2024 Ferengi Commerce Authority. All Rights Reserved. | <a href="#" id="easter-egg">About the Ferengi</a></p>
+    <div id="easter-egg-content" style="display: none; text-align: center; margin-top: 1rem; color: var(--latinum);">
+      <p>🤑 The Ferengi are a fictional extraterrestrial species in the Star Trek universe, known for their love of profit and business acumen. Their Rules of Acquisition guide their every transaction!</p>
+      <p>💡 Fun fact: "Ferengi" is derived from the Persian word for "Frank," referencing medieval European merchants.</p>
+    </div>
   </footer>
   <script>
     // Ferengi Rules of Acquisition with categories
@@ -814,7 +864,9 @@
       currentRule = rule;
       document.getElementById('rule-number').textContent = `Rule of Acquisition #${rule.number}`;
       document.getElementById('rule-text').textContent = rule.text;
-      document.getElementById('result-panel').style.display = 'block';
+      const resultPanel = document.getElementById('result-panel');
+      resultPanel.style.display = 'block';
+      resultPanel.classList.add('rule-card');
 
       // Update favorite button
       const favoriteBtn = document.getElementById('favorite-btn');
@@ -892,6 +944,13 @@
       displayRule(rule);
     });
 
+    // Easter egg
+    document.getElementById('easter-egg').addEventListener('click', function(e) {
+      e.preventDefault();
+      const content = document.getElementById('easter-egg-content');
+      content.style.display = content.style.display === 'none' ? 'block' : 'none';
+    });
+
     // Favorites functionality
     document.getElementById('favorite-btn').addEventListener('click', function() {
       if (!currentRule) return;
@@ -913,7 +972,12 @@
       btn.addEventListener('click', function() {
         if (!currentRule) return;
         const platform = this.dataset.platform;
-        const text = `Ferengi Rule of Acquisition #${currentRule.number}: "${currentRule.text}" - from Latinum Logic`;
+        const baseText = `Ferengi Rule of Acquisition #${currentRule.number}: "${currentRule.text}"`;
+        const hashtags = "#StarTrek #Ferengi #RulesOfAcquisition #Profit #Latinum #BusinessWisdom #CryptoWisdom";
+        const cta = "What's your take on this rule? Share below! 🚀";
+        const text = platform === 'twitter' ?
+          `${baseText}\n\n${cta}\n\n${hashtags}\n\nfrom Latinum Logic` :
+          `${baseText} - from Latinum Logic`;
         const url = encodeURIComponent(window.location.href);
         let shareUrl = '';
 
@@ -921,6 +985,10 @@
           shareUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${url}`;
         } else if (platform === 'facebook') {
           shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${url}&quote=${encodeURIComponent(text)}`;
+        } else if (platform === 'linkedin') {
+          shareUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${url}`;
+        } else if (platform === 'reddit') {
+          shareUrl = `https://reddit.com/submit?url=${url}&title=${encodeURIComponent(`Ferengi Rule #${currentRule.number}: ${currentRule.text}`)}`;
         }
 
         if (shareUrl) {
