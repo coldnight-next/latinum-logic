@@ -56,6 +56,46 @@
       text-align: center;
       z-index: 1;
       margin-bottom: 2rem;
+      position: relative;
+    }
+    .header-controls {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+    }
+    .theme-btn {
+      background: rgba(255, 231, 149, 0.1);
+      border: 1px solid rgba(255, 231, 149, 0.3);
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      color: var(--latinum);
+      cursor: pointer;
+      font-size: 1.2rem;
+      transition: all 0.2s ease;
+    }
+    .theme-btn:hover {
+      background: var(--latinum);
+      color: var(--ferengi-ink);
+    }
+    .rule-of-day {
+      margin-top: 1rem;
+      padding: 1rem;
+      background: var(--card);
+      border: 1px solid rgba(255, 231, 149, 0.35);
+      border-radius: 12px;
+      text-align: center;
+    }
+    .rule-of-day h3 {
+      margin: 0 0 0.5rem;
+      font-size: 1rem;
+      color: var(--latinum-bright);
+    }
+    .rule-of-day p {
+      margin: 0;
+      font-size: 0.9rem;
+      color: var(--latinum);
+      font-style: italic;
     }
     .masthead h1 {
       margin: 0;
@@ -196,6 +236,46 @@
     .hint span {
       color: var(--latinum-bright);
     }
+    #filters {
+      margin-bottom: 1.5rem;
+    }
+    #search-input {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      margin-bottom: 1rem;
+      background: rgba(12, 8, 18, 0.8);
+      color: var(--latinum-bright);
+      border: 1px solid rgba(255, 231, 149, 0.35);
+      border-radius: 12px;
+      font-size: 1rem;
+      font-family: inherit;
+      transition: border-color 0.2s ease;
+    }
+    #search-input:focus {
+      outline: none;
+      border-color: var(--latinum-bright);
+    }
+    #category-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    .category-btn {
+      padding: 0.5rem 0.75rem;
+      background: rgba(255, 231, 149, 0.1);
+      color: var(--latinum);
+      border: 1px solid rgba(255, 231, 149, 0.3);
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-family: inherit;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .category-btn:hover, .category-btn.active {
+      background: var(--latinum);
+      color: var(--ferengi-ink);
+      border-color: var(--latinum);
+    }
     .result-card {
       position: relative;
       padding: 1.5rem;
@@ -252,6 +332,49 @@
       line-height: 1.5;
       color: rgba(255, 231, 149, 0.8);
     }
+    .rule-actions {
+      margin-top: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+    .action-btn {
+      background: rgba(255, 231, 149, 0.1);
+      border: 1px solid rgba(255, 231, 149, 0.3);
+      border-radius: 8px;
+      padding: 0.5rem 1rem;
+      color: var(--latinum);
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: all 0.2s ease;
+    }
+    .action-btn:hover {
+      background: var(--latinum);
+      color: var(--ferengi-ink);
+    }
+    .action-btn.favorited {
+      background: #ff4757;
+      color: white;
+    }
+    .share-buttons {
+      display: flex;
+      gap: 0.5rem;
+    }
+    .share-btn {
+      flex: 1;
+      background: rgba(255, 231, 149, 0.1);
+      border: 1px solid rgba(255, 231, 149, 0.3);
+      border-radius: 8px;
+      padding: 0.5rem;
+      color: var(--latinum);
+      cursor: pointer;
+      font-size: 0.8rem;
+      transition: all 0.2s ease;
+    }
+    .share-btn:hover {
+      background: var(--latinum);
+      color: var(--ferengi-ink);
+    }
     footer {
       margin-top: 3rem;
       font-size: 0.75rem;
@@ -276,12 +399,31 @@
 </head>
 <body>
   <header class='masthead'>
+    <div class='header-controls'>
+      <button id='theme-toggle' class='theme-btn' aria-label='Toggle theme'>🌙</button>
+    </div>
     <h1>Latinum Logic</h1>
     <p class='tagline'>Submit your scheme. Receive Ferengi-sanctioned wisdom.</p>
+    <div id='rule-of-day' class='rule-of-day'>
+      <h3>Rule of the Day</h3>
+      <p id='daily-rule-text'>Loading daily wisdom...</p>
+    </div>
   </header>
   <main class='council'>
     <section class='panel'>
       <h2>State Your Question</h2>
+      <div id='filters'>
+        <input type='text' id='search-input' placeholder='Search rules by keyword...' aria-label='Search Ferengi rules'>
+        <div id='category-buttons'>
+          <button class='category-btn active' data-category='all'>All Rules</button>
+          <button class='category-btn' data-category='profit'>Profit & Finance</button>
+          <button class='category-btn' data-category='business'>Business & Commerce</button>
+          <button class='category-btn' data-category='negotiation'>Negotiation & Deals</button>
+          <button class='category-btn' data-category='ethics'>Ethics & Morality</button>
+          <button class='category-btn' data-category='personal'>Personal Life</button>
+          <button class='category-btn' data-category='wisdom'>General Wisdom</button>
+        </div>
+      </div>
       <form id='advice-form'>
         <label for='question'>What profit dilemma plagues you?</label>
         <textarea id='question' placeholder='Describe your situation, entrepreneur. The lobes are listening...' aria-label='Question for Ferengi advice'></textarea>
@@ -296,6 +438,13 @@
       <h2>Ferengi Wisdom</h2>
       <p class='rule-number' id='rule-number'></p>
       <p class='rule-text' id='rule-text'></p>
+      <div class='rule-actions'>
+        <button id='favorite-btn' class='action-btn'>❤️ Favorite</button>
+        <div class='share-buttons'>
+          <button class='share-btn' data-platform='twitter'>🐦 Share on Twitter</button>
+          <button class='share-btn' data-platform='facebook'>📘 Share on Facebook</button>
+        </div>
+      </div>
       <p class='slogan'>May your profits be eternal.</p>
       <div class='history'>
         <h3>Recent Consultations</h3>
@@ -307,28 +456,37 @@
     <p>&copy; 2024 Ferengi Commerce Authority. All Rights Reserved.</p>
   </footer>
   <script>
-    // Ferengi Rules of Acquisition
+    // Ferengi Rules of Acquisition with categories
+    const categories = {
+      'profit': 'Profit & Finance',
+      'business': 'Business & Commerce',
+      'negotiation': 'Negotiation & Deals',
+      'ethics': 'Ethics & Morality',
+      'personal': 'Personal Life',
+      'wisdom': 'General Wisdom'
+    };
+
     const rules = [
-      { number: 1, text: "Once you have their money, never give it back" },
-      { number: 2, text: "You can't cheat an honest customer, but it never hurts to try" },
-      { number: 3, text: "Never spend more for an acquisition than you have to" },
-      { number: 4, text: "Sex and profit are the two things that never last long enough" },
-      { number: 5, text: "If you can't break a contract, bend it" },
-      { number: 6, text: "Never let family stand in the way of opportunity" },
-      { number: 7, text: "Always keep your ears open" },
-      { number: 8, text: "Keep count of your change" },
-      { number: 9, text: "Instinct plus opportunity equals profit" },
-      { number: 10, text: "A dead customer can't buy as much as a live one" },
-      { number: 11, text: "Latinum isn't the only thing that shines" },
-      { number: 12, text: "Anything worth selling is worth selling twice" },
-      { number: 13, text: "Anything worth doing is worth doing for money" },
-      { number: 14, text: "Anything stolen is pure profit" },
-      { number: 15, text: "Acting stupid is often smart" },
-      { number: 16, text: "A deal is a deal ... until a better one comes along" },
-      { number: 17, text: "A bargain usually isn't" },
-      { number: 18, text: "A Ferengi without profit is no Ferengi at all" },
-      { number: 19, text: "Don't lie too soon after a promotion" },
-      { number: 20, text: "When the customer is sweating, turn up the heat" },
+      { number: 1, text: "Once you have their money, never give it back", category: 'profit' },
+      { number: 2, text: "You can't cheat an honest customer, but it never hurts to try", category: 'business' },
+      { number: 3, text: "Never spend more for an acquisition than you have to", category: 'profit' },
+      { number: 4, text: "Sex and profit are the two things that never last long enough", category: 'profit' },
+      { number: 5, text: "If you can't break a contract, bend it", category: 'negotiation' },
+      { number: 6, text: "Never let family stand in the way of opportunity", category: 'personal' },
+      { number: 7, text: "Always keep your ears open", category: 'wisdom' },
+      { number: 8, text: "Keep count of your change", category: 'profit' },
+      { number: 9, text: "Instinct plus opportunity equals profit", category: 'profit' },
+      { number: 10, text: "A dead customer can't buy as much as a live one", category: 'business' },
+      { number: 11, text: "Latinum isn't the only thing that shines", category: 'profit' },
+      { number: 12, text: "Anything worth selling is worth selling twice", category: 'business' },
+      { number: 13, text: "Anything worth doing is worth doing for money", category: 'profit' },
+      { number: 14, text: "Anything stolen is pure profit", category: 'profit' },
+      { number: 15, text: "Acting stupid is often smart", category: 'wisdom' },
+      { number: 16, text: "A deal is a deal ... until a better one comes along", category: 'negotiation' },
+      { number: 17, text: "A bargain usually isn't", category: 'business' },
+      { number: 18, text: "A Ferengi without profit is no Ferengi at all", category: 'profit' },
+      { number: 19, text: "Don't lie too soon after a promotion", category: 'business' },
+      { number: 20, text: "When the customer is sweating, turn up the heat", category: 'business' },
       { number: 21, text: "Never place friendship before profit" },
       { number: 22, text: "Wise men can hear profit in the wind" },
       { number: 23, text: "Never take the last coin, but be sure to get the rest" },
@@ -597,16 +755,78 @@
       { number: 286, text: "When Morn leaves it is all over" }
     ];
 
-    // Function to get a random rule
+    // Function to assign categories to rules
+    function assignCategories() {
+      rules.forEach(rule => {
+        const text = rule.text.toLowerCase();
+        if (text.includes('profit') || text.includes('latinum') || text.includes('money') || text.includes('finance') || text.includes('rich') || text.includes('wealth') || text.includes('buy') || text.includes('sell') || text.includes('pay')) {
+          rule.category = 'profit';
+        } else if (text.includes('business') || text.includes('customer') || text.includes('sale') || text.includes('advertising') || text.includes('user') || text.includes('vendor') || text.includes('inventory') || text.includes('war') || text.includes('peace')) {
+          rule.category = 'business';
+        } else if (text.includes('deal') || text.includes('contract') || text.includes('negotiat') || text.includes('bargain') || text.includes('bid') || text.includes('offer') || text.includes('bluff') || text.includes('klingon')) {
+          rule.category = 'negotiation';
+        } else if (text.includes('lie') || text.includes('cheat') || text.includes('morality') || text.includes('honest') || text.includes('trust') || text.includes('revenge') || text.includes('conscience')) {
+          rule.category = 'ethics';
+        } else if (text.includes('family') || text.includes('mother') || text.includes('wife') || text.includes('woman') || text.includes('sex') || text.includes('lust') || text.includes('oo-mox') || text.includes('ear') || text.includes('lobes')) {
+          rule.category = 'personal';
+        } else {
+          rule.category = 'wisdom';
+        }
+      });
+    }
+
+    assignCategories();
+
+    // Rule of the Day
+    function getRuleOfDay() {
+      const today = new Date().toDateString();
+      const seed = today.split('').reduce((a, b) => a + b.charCodeAt(0), 0);
+      return rules[seed % rules.length];
+    }
+
+    // Display Rule of the Day
+    const dailyRule = getRuleOfDay();
+    document.getElementById('daily-rule-text').textContent = `"${dailyRule.text}" (Rule #${dailyRule.number})`;
+
+    let currentCategory = 'all';
+    let searchQuery = '';
+    let favorites = JSON.parse(localStorage.getItem('ferengiFavorites') || '[]');
+    let stats = JSON.parse(localStorage.getItem('ferengiStats') || '{"totalViews": 0, "popularRules": {}}');
+    let currentRule = null;
+
+    // Function to get filtered rules
+    function getFilteredRules() {
+      return rules.filter(rule => {
+        const matchesCategory = currentCategory === 'all' || rule.category === currentCategory;
+        const matchesSearch = searchQuery === '' || rule.text.toLowerCase().includes(searchQuery.toLowerCase()) || rule.number.toString().includes(searchQuery);
+        return matchesCategory && matchesSearch;
+      });
+    }
+
+    // Function to get a random rule from filtered
     function getRandomRule() {
-      return rules[Math.floor(Math.random() * rules.length)];
+      const filtered = getFilteredRules();
+      return filtered[Math.floor(Math.random() * filtered.length)] || rules[Math.floor(Math.random() * rules.length)];
     }
 
     // Function to display a rule
     function displayRule(rule) {
+      currentRule = rule;
       document.getElementById('rule-number').textContent = `Rule of Acquisition #${rule.number}`;
       document.getElementById('rule-text').textContent = rule.text;
       document.getElementById('result-panel').style.display = 'block';
+
+      // Update favorite button
+      const favoriteBtn = document.getElementById('favorite-btn');
+      const isFavorited = favorites.includes(rule.number);
+      favoriteBtn.textContent = isFavorited ? '💔 Unfavorite' : '❤️ Favorite';
+      favoriteBtn.classList.toggle('favorited', isFavorited);
+
+      // Track stats
+      stats.totalViews++;
+      stats.popularRules[rule.number] = (stats.popularRules[rule.number] || 0) + 1;
+      localStorage.setItem('ferengiStats', JSON.stringify(stats));
+
       // Add to history
       const historyList = document.getElementById('history-list');
       const li = document.createElement('li');
@@ -618,6 +838,48 @@
       }
     }
 
+    // Theme toggle functionality
+    const themeToggle = document.getElementById('theme-toggle');
+    let isDark = true;
+    themeToggle.addEventListener('click', function() {
+      isDark = !isDark;
+      document.documentElement.style.setProperty('--latinum', isDark ? '#f9d96c' : '#2c3e50');
+      document.documentElement.style.setProperty('--latinum-bright', isDark ? '#ffe795' : '#34495e');
+      document.documentElement.style.setProperty('--ferengi-orange', isDark ? '#ff8a3d' : '#e67e22');
+      document.documentElement.style.setProperty('--ferengi-deep', isDark ? '#5a2a2a' : '#8e44ad');
+      document.documentElement.style.setProperty('--ferengi-ink', isDark ? '#0b090e' : '#ecf0f1');
+      document.documentElement.style.setProperty('--card', isDark ? 'rgba(18, 12, 24, 0.75)' : 'rgba(255, 255, 255, 0.9)');
+      document.body.style.background = isDark ?
+        'radial-gradient(circle at top, #3c2f4f 0%, #120b1f 45%, #040208 100%)' :
+        'radial-gradient(circle at top, #bdc3c7 0%, #95a5a6 45%, #7f8c8d 100%)';
+      themeToggle.textContent = isDark ? '🌙' : '☀️';
+    });
+
+    // Search functionality
+    const searchInput = document.getElementById('search-input');
+    searchInput.addEventListener('input', function() {
+      searchQuery = this.value.trim();
+      updateActiveCategory();
+    });
+
+    // Category filter functionality
+    const categoryButtons = document.querySelectorAll('.category-btn');
+    categoryButtons.forEach(btn => {
+      btn.addEventListener('click', function() {
+        currentCategory = this.dataset.category;
+        categoryButtons.forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+      });
+    });
+
+    function updateActiveCategory() {
+      // If search is active, highlight 'all'
+      if (searchQuery !== '') {
+        categoryButtons.forEach(b => b.classList.remove('active'));
+        document.querySelector('[data-category="all"]').classList.add('active');
+      }
+    }
+
     // Event listeners
     document.getElementById('random-button').addEventListener('click', function() {
       const rule = getRandomRule();
@@ -626,8 +888,45 @@
 
     document.getElementById('advice-form').addEventListener('submit', function(e) {
       e.preventDefault();
-      const rule = getRandomRule(); // For now, random; could implement keyword matching later
+      const rule = getRandomRule();
       displayRule(rule);
+    });
+
+    // Favorites functionality
+    document.getElementById('favorite-btn').addEventListener('click', function() {
+      if (!currentRule) return;
+      const index = favorites.indexOf(currentRule.number);
+      if (index > -1) {
+        favorites.splice(index, 1);
+        this.textContent = '❤️ Favorite';
+        this.classList.remove('favorited');
+      } else {
+        favorites.push(currentRule.number);
+        this.textContent = '💔 Unfavorite';
+        this.classList.add('favorited');
+      }
+      localStorage.setItem('ferengiFavorites', JSON.stringify(favorites));
+    });
+
+    // Share functionality
+    document.querySelectorAll('.share-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        if (!currentRule) return;
+        const platform = this.dataset.platform;
+        const text = `Ferengi Rule of Acquisition #${currentRule.number}: "${currentRule.text}" - from Latinum Logic`;
+        const url = encodeURIComponent(window.location.href);
+        let shareUrl = '';
+
+        if (platform === 'twitter') {
+          shareUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${url}`;
+        } else if (platform === 'facebook') {
+          shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${url}&quote=${encodeURIComponent(text)}`;
+        }
+
+        if (shareUrl) {
+          window.open(shareUrl, '_blank', 'width=600,height=400');
+        }
+      });
     });
   </script>
 </body>
