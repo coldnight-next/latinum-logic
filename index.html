@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+  <meta charset='UTF-8'>
+  <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+  <title>Latinum Logic | Ferengi Rule Oracle</title>
+  <link rel='preconnect' href='https://fonts.googleapis.com'>
+  <link rel='preconnect' href='https://fonts.gstatic.com' crossorigin>
+  <link href='https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700&family=Share+Tech+Mono&display=swap' rel='stylesheet'>
+  <style>
+    :root {
+      color-scheme: dark;
+      --latinum: #f9d96c;
+      --latinum-bright: #ffe795;
+      --ferengi-orange: #ff8a3d;
+      --ferengi-deep: #5a2a2a;
+      --ferengi-ink: #0b090e;
+      --card: rgba(18, 12, 24, 0.75);
+    }
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2.5rem 1.5rem 4rem;
+      font-family: 'Share Tech Mono', 'Trebuchet MS', sans-serif;
+      background: radial-gradient(circle at top, #3c2f4f 0%, #120b1f 45%, #040208 100%);
+      color: var(--latinum);
+      position: relative;
+      overflow-x: hidden;
+    }
+    body::before,
+    body::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 15% 20%, rgba(255, 180, 0, 0.12), transparent 55%),
+                  radial-gradient(circle at 82% 12%, rgba(114, 198, 255, 0.12), transparent 45%),
+                  radial-gradient(circle at 50% 85%, rgba(255, 110, 44, 0.18), transparent 50%);
+      filter: blur(6px);
+      z-index: 0;
+    }
+    body::after {
+      opacity: 0.4;
+      animation: shimmer 12s infinite alternate;
+    }
+    @keyframes shimmer {
+      0% { transform: translateX(-2%); opacity: 0.35; }
+      100% { transform: translateX(2%); opacity: 0.55; }
+    }
+    .masthead {
+      text-align: center;
+      z-index: 1;
+      margin-bottom: 2rem;
+    }
+    .masthead h1 {
+      margin: 0;
+      font-family: 'Orbitron', 'Share Tech Mono', sans-serif;
+      font-size: clamp(2.5rem, 4vw, 3.75rem);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--latinum-bright);
+      text-shadow: 0 0 12px rgba(255, 231, 149, 0.45);
+    }
+    .masthead .tagline {
+      margin: 0.5rem 0 0;
+      font-size: 1rem;
+      letter-spacing: 0.08em;
+      color: rgba(255, 231, 149, 0.8);
+    }
+    .council {
+      width: min(1100px, 100%);
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 2rem;
+      z-index: 1;
+    }
+    .panel {
+      background: var(--card);
+      border: 1px solid rgba(249, 217, 108, 0.35);
+      border-radius: 18px;
+      padding: 1.75rem;
+      position: relative;
+      box-shadow:
+        0 0 0 1px rgba(255, 231, 149, 0.08),
+        0 18px 45px rgba(5, 2, 12, 0.65);
+      backdrop-filter: blur(12px);
+    }
+    .panel::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      padding: 1px;
+      background: linear-gradient(135deg, rgba(255, 229, 139, 0.55), rgba(255, 138, 61, 0.4));
+      -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      pointer-events: none;
+    }
+    .panel h2 {
+      margin-top: 0;
+      font-family: 'Orbitron', 'Share Tech Mono', sans-serif;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      font-size: 1.1rem;
+      color: var(--latinum-bright);
+    }
+    label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-size: 0.9rem;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: rgba(255, 231, 149, 0.78);
+    }
+    textarea {
+      width: 100%;
+      min-height: 160px;
+      background: rgba(12, 8, 18, 0.8);
+      color: var(--latinum-bright);
+      border: 1px solid rgba(255, 231, 149, 0.35);
+      border-radius: 14px;
+      padding: 1rem 1.1rem;
+      font-size: 1rem;
+      font-family: inherit;
+      line-height: 1.5;
+      resize: vertical;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    textarea:focus {
+      outline: none;
+      border-color: var(--latinum-bright);
+      box-shadow: 0 0 18px rgba(255, 231, 149, 0.3);
+    }
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      margin-top: 1.1rem;
+    }
+    button {
+      flex: 1 1 220px;
+      border: none;
+      border-radius: 999px;
+      padding: 0.9rem 1.5rem;
+      font-size: 0.95rem;
+      font-family: 'Orbitron', 'Share Tech Mono', sans-serif;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      color: var(--ferengi-ink);
+      background: linear-gradient(135deg, #ffe795, #ff8a3d);
+      box-shadow: 0 12px 30px rgba(255, 138, 61, 0.45);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    button::after {
+      content: '';
+      position: absolute;
+      top: -40%;
+      left: -20%;
+      width: 140%;
+      height: 180%;
+      background: linear-gradient(120deg, rgba(255, 255, 255, 0.45), transparent 60%);
+      transform: translateX(-120%);
+      transition: transform 0.5s ease;
+    }
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 18px 40px rgba(255, 138, 61, 0.55);
+    }
+    button:hover::after {
+      transform: translateX(80%);
+    }
+    button.secondary {
+      background: linear-gradient(135deg, rgba(255, 231, 149, 0.15), rgba(255, 138, 61, 0.2));
+      color: var(--latinum-bright);
+      border: 1px solid rgba(255, 231, 149, 0.35);
+      box-shadow: 0 8px 22px rgba(12, 6, 18, 0.4);
+    }
+    button.secondary:hover {
+      box-shadow: 0 12px 28px rgba(12, 6, 18, 0.55);
+    }
+    .hint {
+      margin-top: 1.4rem;
+      font-size: 0.85rem;
+      color: rgba(255, 231, 149, 0.7);
+      letter-spacing: 0.03em;
+    }
+    .hint span {
+      color: var(--latinum-bright);
+    }
+    .result-card {
+      position: relative;
+      padding: 1.5rem;
+      border-radius: 16px;
+      background: rgba(9, 6, 14, 0.75);
+      border: 1px solid rgba(255, 231, 149, 0.2);
+      box-shadow: inset 0 0 0 1px rgba(255, 231, 149, 0.08);
+      min-height: 180px;
+    }
+    .rule-number {
+      margin: 0;
+      font-family: 'Orbitron', 'Share Tech Mono', sans-serif;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      font-size: 0.85rem;
+      color: rgba(255, 231, 149, 0.75);
+    }
+    .rule-text {
+      margin: 1rem 0 0;
+      font-size: 1.2rem;
+      line-height: 1.6;
+      color: var(--latinum-bright);
+    }
+    .slogan {
+      margin-top: 1rem;
+      font-size: 0.85rem;
+      letter-spacing: 0.05em;
+      color: rgba(255, 138, 61, 0.85);
+    }
+    .history {
+      margin-top: 1.75rem;
+    }
+    .history h3 {
+      margin: 0 0 0.75rem;
+      font-size: 0.95rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: rgba(255, 231, 149, 0.8);
+      font-family: 'Orbitron', 'Share Tech Mono', sans-serif;
+    }
+    #history-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: grid;
+      gap: 0.75rem;
+    }
+    #history-list li {
+      background: rgba(14, 10, 18, 0.75);
+      border: 1px solid rgba(255, 231, 149, 0.15);
+      border-radius: 12px;
+      padding: 0.85rem 1rem;
+      font-size: 0.85rem;
+      line-height: 1.5;
+      color: rgba(255, 231, 149, 0.8);
+    }
+    footer {
+      margin-top: 3rem;
+      font-size: 0.75rem;
+      color: rgba(255, 231, 149, 0.6);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      text-align: center;
+      z-index: 1;
+    }
+    @media (max-width: 720px) {
+      body {
+        padding: 2rem 1rem 3rem;
+      }
+      .controls {
+        flex-direction: column;
+      }
+      button {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class='masthead'>
+    <h1>Latinum Logic</h1>
+    <p class='tagline'>Submit your scheme. Receive Ferengi-sanctioned wisdom.</p>
+  </header>
+  <main class='council'>
+    <section class='panel'>
+      <h2>State Your Question</h2>
+      <form id='advice-form'>
+        <label for='question'>What profit dilemma plagues you?</label>
+        <textarea id='question' placeholder='Describe your situation, entrepreneur. The lobes are listening...' aria-label='Question for Ferengi advice'></textarea>
+        <div class='controls'>
+          <button type='submit'>Consult the Rules</button>
+          <button type='button' class='secondary' id='random-button'>Deal Me a Random Rule</button>
+        </div>
+      </form>
+
+    </section>
+    <section class='panel result-card' id='result-panel' style='display: none;'>
+      <h2>Ferengi Wisdom</h2>
+      <p class='rule-number' id='rule-number'></p>
+      <p class='rule-text' id='rule-text'></p>
+      <p class='slogan'>May your profits be eternal.</p>
+      <div class='history'>
+        <h3>Recent Consultations</h3>
+        <ul id='history-list'></ul>
+      </div>
+    </section>
+  </main>
+  <footer>
+    <p>&copy; 2024 Ferengi Commerce Authority. All Rights Reserved.</p>
+  </footer>
+  <script>
+    // Ferengi Rules of Acquisition
+    const rules = [
+      { number: 1, text: "Once you have their money, never give it back" },
+      { number: 2, text: "You can't cheat an honest customer, but it never hurts to try" },
+      { number: 3, text: "Never spend more for an acquisition than you have to" },
+      { number: 4, text: "Sex and profit are the two things that never last long enough" },
+      { number: 5, text: "If you can't break a contract, bend it" },
+      { number: 6, text: "Never let family stand in the way of opportunity" },
+      { number: 7, text: "Always keep your ears open" },
+      { number: 8, text: "Keep count of your change" },
+      { number: 9, text: "Instinct plus opportunity equals profit" },
+      { number: 10, text: "A dead customer can't buy as much as a live one" },
+      { number: 11, text: "Latinum isn't the only thing that shines" },
+      { number: 12, text: "Anything worth selling is worth selling twice" },
+      { number: 13, text: "Anything worth doing is worth doing for money" },
+      { number: 14, text: "Anything stolen is pure profit" },
+      { number: 15, text: "Acting stupid is often smart" },
+      { number: 16, text: "A deal is a deal ... until a better one comes along" },
+      { number: 17, text: "A bargain usually isn't" },
+      { number: 18, text: "A Ferengi without profit is no Ferengi at all" },
+      { number: 19, text: "Don't lie too soon after a promotion" },
+      { number: 20, text: "When the customer is sweating, turn up the heat" },
+      { number: 21, text: "Never place friendship before profit" },
+      { number: 22, text: "Wise men can hear profit in the wind" },
+      { number: 23, text: "Never take the last coin, but be sure to get the rest" },
+      { number: 24, text: "Never ask when you can take" },
+      { number: 25, text: "Fear makes a good business partner" },
+      { number: 26, text: "The vast majority of the rich in this galaxy did not inherit their wealth; they stole it" },
+      { number: 27, text: "The most beautiful thing about a tree is what you do with it after you cut it down" },
+      { number: 28, text: "Morality is always defined by those in power" },
+      { number: 29, text: "When someone says \"It's not the money,\" they're lying" },
+      { number: 30, text: "Talk is cheap; synthehol costs money" },
+      { number: 31, text: "Never make fun of a Ferengi's mother" },
+      { number: 32, text: "Be careful what you sell. It may do exactly what the customer expects" },
+      { number: 33, text: "It never hurts to suck up to the boss" },
+      { number: 34, text: "War is good for business" },
+      { number: 35, text: "Peace is good for business" },
+      { number: 36, text: "Too many Ferengi can't laugh at themselves anymore" },
+      { number: 37, text: "You can always buy back a lost reputation" },
+      { number: 38, text: "Free advertising is cheap" },
+      { number: 39, text: "Praise is cheap. Heap it generously on all users" },
+      { number: 40, text: "If you see profit on a journey, take it" },
+      { number: 41, text: "Money talks, but having a lots of it gets more attention" },
+      { number: 42, text: "Only negotiate when you are certain to profit" },
+      { number: 43, text: "Caressing an ear is often more forceful than pointing a weapon" },
+      { number: 44, text: "Never argue with a loaded phaser" },
+      { number: 45, text: "Profit has limits. Loss has none" },
+      { number: 46, text: "Labor camps are full of people who trusted the wrong person" },
+      { number: 47, text: "Never trust a man wearing a better suit than your own" },
+      { number: 48, text: "The bigger the smile, the sharper the knife" },
+      { number: 49, text: "Old age and greed will always overcome youth and talent" },
+      { number: 50, text: "Never bluff a Klingon" },
+      { number: 51, text: "Never admit a mistake if there's someone else to blame" },
+      { number: 52, text: "Only Bugsy could have built Las Vegas" },
+      { number: 53, text: "Sell first; ask questions later" },
+      { number: 54, text: "Never buy anything you can't sell" },
+      { number: 55, text: "Always sell at the highest possible profit" },
+      { number: 56, text: "Pursue profit; women come later" },
+      { number: 57, text: "Good users are almost as rare as Latinum - treasure them" },
+      { number: 58, text: "Friendship is seldom cheap" },
+      { number: 59, text: "Free advice is never cheap" },
+      { number: 60, text: "Never use Latinum where your words will do" },
+      { number: 61, text: "Never buy what can be stolen" },
+      { number: 62, text: "The riskier the road, the greater the profit" },
+      { number: 63, text: "Power without profit is like a ship without an engine" },
+      { number: 64, text: "Don't talk shop; talk shopping" },
+      { number: 65, text: "Don't talk ship; talk shipping" },
+      { number: 66, text: "Anyone serving in a fleet who is crazy can be relieved, if they ask for it" },
+      { number: 67, text: "Enough is never enough" },
+      { number: 68, text: "Compassion is no substitute for a profit" },
+      { number: 69, text: "You could afford your ship without your government - if it weren't for your government" },
+      { number: 70, text: "Get the money first, then let the buyers worry about collecting the merchandise" },
+      { number: 71, text: "Gamble and trade have two things in common: risk and Latinum" },
+      { number: 72, text: "Never let the competition know what you're thinking" },
+      { number: 73, text: "Never trust advice from a dying Ferengi; listen but don't trust" },
+      { number: 74, text: "A Ferengi without profit is no Ferengi at all" },
+      { number: 75, text: "Home is where the heart is, but the stars are made of Latinum" },
+      { number: 76, text: "Every once in a while, declare peace. It confuses the hell out of your enemies" },
+      { number: 77, text: "Go where no Ferengi has gone before; where there is no reputation there is profit" },
+      { number: 78, text: "Don't discriminate. The most unlikely species can create the best users" },
+      { number: 79, text: "Benefit from the Vulcan greed for knowledge" },
+      { number: 80, text: "If it works, sell it. If it works well, sell it for more. If it doesn't work, quadruple the price and sell it as an antique" },
+      { number: 81, text: "There's nothing more dangerous than an honest businessman" },
+      { number: 82, text: "A smart customer is not a good customer" },
+      { number: 83, text: "Revenge is profitless" },
+      { number: 84, text: "She can touch your ears but never your Latinum" },
+      { number: 85, text: "Death takes no bribes" },
+      { number: 86, text: "A wife is a luxury, a smart accountant a necessity" },
+      { number: 87, text: "Trust is the biggest liability of all" },
+      { number: 88, text: "When the boss comes to dinner, it never hurts to have the wife wear something" },
+      { number: 89, text: "Latinum lasts longer than lust" },
+      { number: 90, text: "Mine is better than ours" },
+      { number: 91, text: "He who drinks fast pays slow" },
+      { number: 92, text: "Never confuse wisdom with luck" },
+      { number: 93, text: "He's a fool who makes his doctor his heir" },
+      { number: 94, text: "Beware of small expenses: a small leak will kill a ship" },
+      { number: 95, text: "Important, more important, Latinum" },
+      { number: 96, text: "Faith moves mountains - of inventory" },
+      { number: 97, text: "If you would keep a secret from an enemy, don't tell it to a friend" },
+      { number: 98, text: "Profit is the better part of valor" },
+      { number: 99, text: "Never trust a wise man" },
+      { number: 100, text: "Everything that has no owner, needs one" },
+      { number: 101, text: "Never do something you can make someone do for you" },
+      { number: 102, text: "Nature decays, but Latinum lasts forever" },
+      { number: 103, text: "Sleep can interfere with opportunity" },
+      { number: 104, text: "Money is never made. It is merely won or lost" },
+      { number: 105, text: "Wise men don't lie, they just bend the truth" },
+      { number: 106, text: "There is no honor in poverty" },
+      { number: 107, text: "Win or lose, there's always Huyperian Beetle Snuff" },
+      { number: 108, text: "A woman wearing clothes is like a man without profit" },
+      { number: 109, text: "Dignity and an empty sack is worth the sack" },
+      { number: 110, text: "Only a fool passes up a business opportunity" },
+      { number: 111, text: "Treat people in your debt like family ... exploit them" },
+      { number: 112, text: "Never sleep with the boss's wife unless you pay him first" },
+      { number: 113, text: "Never sleep with the boss's sister" },
+      { number: 114, text: "Small print leads to large risk" },
+      { number: 115, text: "Greed is eternal" },
+      { number: 116, text: "There's always a way out" },
+      { number: 117, text: "If the profit seems too good to be true, it usually is" },
+      { number: 118, text: "Never cheat an honest man offering a decent price" },
+      { number: 119, text: "Buy, sell, or get out of the way" },
+      { number: 120, text: "Even a blind man can recognize the glow of Latinum" },
+      { number: 121, text: "Everything is for sale, even friendship" },
+      { number: 122, text: "As the users go, so goes the wise profiteer" },
+      { number: 123, text: "A friend is only a friend until you sell him something. Then he is a customer" },
+      { number: 124, text: "Friendship is temporary, profit is forever" },
+      { number: 125, text: "A lie isn't a lie until someone else knows the truth" },
+      { number: 126, text: "A lie isn't a lie, it's just the truth seen from a different point of view" },
+      { number: 127, text: "Gratitude can bring on generosity" },
+      { number: 128, text: "Ferengi's don't responsible for the stupidity of other races" },
+      { number: 129, text: "Never trust your users" },
+      { number: 130, text: "Never trust a beneficiary" },
+      { number: 131, text: "If you sell it, make sure it has a warranty" },
+      { number: 132, text: "The flimsier the produce, the higher the price" },
+      { number: 133, text: "Never judge a customer by the size of his wallet ... sometimes good things come in small packages" },
+      { number: 134, text: "There's always a catch" },
+      { number: 135, text: "The only value of a collectible is what you can get somebody else to pay for it" },
+      { number: 136, text: "The sharp knife cuts quickly. Act without delay!" },
+      { number: 137, text: "Necessity is the mother of invention. Profit is the father" },
+      { number: 138, text: "Law makes everyone equal, but justice goes to the highest bidder" },
+      { number: 139, text: "Wives serve; brother inherit" },
+      { number: 140, text: "The answer to quick and easy profit is: buy for less, sell for more" },
+      { number: 141, text: "Competition and fair play are mutually exclusive. Fair play and financial loss go hand-in-hand" },
+      { number: 142, text: "A Ferengi waits to bid until his opponents have exhausted themselves" },
+      { number: 143, text: "The family of Fools is ancient" },
+      { number: 144, text: "There's nothing wrong with charity ... as long as it winds up in your pocket" },
+      { number: 145, text: "Always ask for the costs first" },
+      { number: 146, text: "If possible sell neither the sizzle nor the steak, but the Elphasian wheat germ" },
+      { number: 147, text: "New users are like razor-toothed gree worms. They can be succulent, but sometimes they bite back" },
+      { number: 148, text: "Opportunity waits for no one" },
+      { number: 149, text: "Females and finances don't mix" },
+      { number: 150, text: "Make your shop easy to find" },
+      { number: 151, text: "Sometimes, what you get free costs entirely too much" },
+      { number: 152, text: "Ask not what your profits can do for you; ask what you can do for your profits" },
+      { number: 153, text: "You can't free a fish from water" },
+      { number: 154, text: "The difference between manure and Latinum is commerce" },
+      { number: 155, text: "What's mine is mine, and what's yours is mine too" },
+      { number: 156, text: "Even in the worst of times someone turns a profit" },
+      { number: 157, text: "You are surrounded by opportunities; you just have to know where to look" },
+      { number: 158, text: "Don't pay until you have the goods" },
+      { number: 159, text: "The customer is always right ... until you have their cash" },
+      { number: 160, text: "Respect is good, Latinum is better" },
+      { number: 161, text: "Never kill a customer, unless you make more profit out of his death than out of his life" },
+      { number: 162, text: "His money is only yours when he can't get it back" },
+      { number: 163, text: "A thirsty customer is good for profit, a drunk one isn't" },
+      { number: 164, text: "Never spend your own money when you can spend someone else's" },
+      { number: 165, text: "Never allow one's culture's law to get in the way of a universal goal: profit" },
+      { number: 166, text: "Never give away for free what can be sold" },
+      { number: 167, text: "If a deal is fairly and lawfully made, then seeking revenge especially unprofitable revenge, is illegal" },
+      { number: 168, text: "Beware of relatives bearing gifts" },
+      { number: 169, text: "If you're going to have to endure, make yourself comfortable" },
+      { number: 170, text: "Never gamble with an empath" },
+      { number: 171, text: "Time is Latinum. The early Ferengi get the Latinum" },
+      { number: 172, text: "If you can sell it, don't hesitate to steal it" },
+      { number: 173, text: "A piece of Latinum in the hand is worth two in a customer's pocket" },
+      { number: 174, text: "Share and perish" },
+      { number: 175, text: "When everything fails - run" },
+      { number: 176, text: "Ferengi's don't give promotional gifts!" },
+      { number: 177, text: "Know your enemies ... but do business with them always" },
+      { number: 178, text: "The world is a stage - don't forget to demand admission" },
+      { number: 179, text: "Whenever you think that things can't get worse, the FCA will be knocking on your door" },
+      { number: 180, text: "Never offer a confession when a bribe will do" },
+      { number: 181, text: "Even dishonesty can't tarnish the glow of Latinum" },
+      { number: 182, text: "Whenever you're being asked if you are god, the right answer is YES" },
+      { number: 183, text: "Genius without opportunity is like Latinum in the mine" },
+      { number: 184, text: "There are three things you must not talk to aliens: sex, religion and taxes" },
+      { number: 185, text: "If you want to ruin yourself there are three known ways: Gambling is the fastest, women are the sweetest, and banks are the most reliable way" },
+      { number: 186, text: "There are two things that will catch up with you for sure: death and taxes" },
+      { number: 187, text: "If your dancing partner wants to lead at all costs, let her have her own way and ask another one to dance" },
+      { number: 188, text: "Never bet on a race you haven't fixed" },
+      { number: 189, text: "Borrow on a handshake; lend in writing" },
+      { number: 190, text: "Drive your business or it will drive you" },
+      { number: 191, text: "Let other keep their reputation. You keep their money" },
+      { number: 192, text: "If the flushing isn't strong enough, use your brain and try the brush" },
+      { number: 193, text: "Klingon women don't dance tango" },
+      { number: 194, text: "It's always good business to know about new users before they walk in your door" },
+      { number: 195, text: "Wounds heal, but debt is forever" },
+      { number: 196, text: "Only give money to people you know you can steal from" },
+      { number: 197, text: "Never trust your users, especially if they are your relatives" },
+      { number: 198, text: "Employees are the rungs on your ladder to success - don't hesitate to step on them" },
+      { number: 199, text: "The secret of one person is another person's opportunity" },
+      { number: 200, text: "A madman with Latinum means profit without return" },
+      { number: 201, text: "The justification for profit is profit" },
+      { number: 202, text: "a) A friend in need is a customer in the making b) A friend in need means three times the profit" },
+      { number: 203, text: "A Ferengi in need, will never do anything for free" },
+      { number: 204, text: "When the Grand Nagus arrives to offer you a business opportunity, it's time to leave town until he's gone" },
+      { number: 205, text: "When the customer dies, the money stops a-comin'" },
+      { number: 206, text: "Fighting with Klingons is like gambling with Cardassians - it's good to have a friend around when you lose" },
+      { number: 207, text: "Never trust a hardworking employee" },
+      { number: 208, text: "Give someone a fish, you feed him for one day. Teach him how to fish, and you lose a steady customer" },
+      { number: 209, text: "Tell them what they want to hear" },
+      { number: 210, text: "A wife, who is able to clean, saves the cleaning lady" },
+      { number: 211, text: "In business deals, a disruptor can be almost as important as a calculator" },
+      { number: 212, text: "If they accept your first offer, you either asked too little or offered too much" },
+      { number: 213, text: "Stay neutral in conflicts so that you can sell supplies to both sides" },
+      { number: 214, text: "Never begin a business transaction on an empty stomach" },
+      { number: 215, text: "Instinct without opportunity is useless" },
+      { number: 216, text: "Never take hospitality from someone worse off than yourself" },
+      { number: 217, text: "Only pay for it if you are confronted with loaded phaser" },
+      { number: 218, text: "Always know what you're buying" },
+      { number: 219, text: "A friend is not a friend if he asks for a discount" },
+      { number: 220, text: "Profit is like a bed of roses - a few thorns are inevitable" },
+      { number: 221, text: "Beware of any man who thinks with his lobes" },
+      { number: 222, text: "Knowledge is Latinum. Love has finally become logical" },
+      { number: 223, text: "Rich men don't come to buy; they come to take" },
+      { number: 224, text: "Never throw anything away: It may be worth a lot of Latinum some Stardate" },
+      { number: 225, text: "Pride comes before a loss" },
+      { number: 226, text: "Don't take your family for granted, only their Latinum" },
+      { number: 227, text: "Loyalty can be bought ... and sold" },
+      { number: 228, text: "All things come to those who wait, even Latinum" },
+      { number: 229, text: "Beware the man who doesn't make time for oo-mox" },
+      { number: 230, text: "Manipulation may be a Ferengi's greatest tool, and liability" },
+      { number: 231, text: "If you steal it, make sure it has a warranty" },
+      { number: 232, text: "Life's not fair (How else would you turn a profit?)" },
+      { number: 233, text: "Every dark cloud has a Latinum lining" },
+      { number: 234, text: "Never deal with beggars; it's bad for profits" },
+      { number: 235, text: "Don't trust anyone who trusts you" },
+      { number: 236, text: "You can't buy fate" },
+      { number: 237, text: "There's a sucker born every minute. Be sure you're the first to find each one" },
+      { number: 238, text: "The truth will cost" },
+      { number: 239, text: "Ambition knows no family" },
+      { number: 240, text: "The higher you bid, the more users you drive away" },
+      { number: 241, text: "Never underestimate the importance of the first impression" },
+      { number: 242, text: "More is good, all is better" },
+      { number: 243, text: "If you got something nice to say, then SHOUT" },
+      { number: 244, text: "If you can't sell it, sit on it, but never give it away" },
+      { number: 245, text: "A warranty is valid only if they can find you" },
+      { number: 246, text: "He that speaks ill of the wares will buy them" },
+      { number: 247, text: "Never question luck" },
+      { number: 248, text: "Celebrate when you are paid, not, when you are promised" },
+      { number: 249, text: "Respect other culture's beliefs; they'll be more likely to give you money" },
+      { number: 250, text: "A dead vendor doesn't demand money" },
+      { number: 251, text: "Satisfaction is not guaranteed" },
+      { number: 252, text: "Let the buyer beware" },
+      { number: 253, text: "A contract without fine print is a fool's document" },
+      { number: 254, text: "Anyone who can't tell a fake doesn't deserve the real thing" },
+      { number: 255, text: "A warranty without loop-holes is a liability" },
+      { number: 256, text: "Synthehol is the lubricant of choice for a customer's stuck purse" },
+      { number: 257, text: "Only fools negotiate with their own money" },
+      { number: 258, text: "A Ferengi is only as important as the amount of Latinum he carries in his pockets" },
+      { number: 259, text: "A lie is a way to tell the truth to someone who doesn't know" },
+      { number: 260, text: "Gambling is like the way to power: The only way to win is to cheat, but don't get caught in the process" },
+      { number: 261, text: "A wealthy man can afford everything except a conscience" },
+      { number: 262, text: "No lobes, no profit" },
+      { number: 263, text: "Never let a female in clothes cloud your sense of profit" },
+      { number: 264, text: "It's not the size of your planet, but it's income, that matters" },
+      { number: 265, text: "The fear of loss may be your greatest enemy or your best friend - choose wisely" },
+      { number: 266, text: "A pair of good ears will ring dry a hundred tongues" },
+      { number: 267, text: "Wish not so much to live long, as to live well" },
+      { number: 268, text: "a) When in doubt, lie b) When in doubt, buy c) When in doubt, demand more money d) When in doubt, shoot them, take their money, run and blame someone else" },
+      { number: 269, text: "Never purchase anything that has been promised to be valuable or go up in value" },
+      { number: 270, text: "It's better to have gambled and lost than to never have gambled at all" },
+      { number: 271, text: "There's many witty men whose brains can't line their pockets" },
+      { number: 272, text: "The way to a Ferengi's heart is through his wallet" },
+      { number: 273, text: "Always count their Latinum before selling anything" },
+      { number: 274, text: "There is no profit in love; however, a strong heart is worth a few bars of Latinum on the open market. Keep it on ice" },
+      { number: 275, text: "Latinum can't buy happiness, but you can sure have a blast renting it" },
+      { number: 276, text: "If at first you don't succeed, try to acquire again" },
+      { number: 277, text: "Diamonds may be girl's best friend, but you can only buy the girl with Latinum" },
+      { number: 278, text: "It's better to swallow your pride than to lose your profit" },
+      { number: 279, text: "Never close a deal too soon after a female strokes your lobes" },
+      { number: 280, text: "An empty bag can not stand upright" },
+      { number: 281, text: "Blood is thicker than water, but harder to sell" },
+      { number: 282, text: "Business is like war; it's important to recognize the winner" },
+      { number: 283, text: "Rules are always subject to change" },
+      { number: 284, text: "Rules are always subject to interpretation" },
+      { number: 285, text: "No good deed ever goes unpunished" },
+      { number: 286, text: "When Morn leaves it is all over" }
+    ];
+
+    // Function to get a random rule
+    function getRandomRule() {
+      return rules[Math.floor(Math.random() * rules.length)];
+    }
+
+    // Function to display a rule
+    function displayRule(rule) {
+      document.getElementById('rule-number').textContent = `Rule of Acquisition #${rule.number}`;
+      document.getElementById('rule-text').textContent = rule.text;
+      document.getElementById('result-panel').style.display = 'block';
+      // Add to history
+      const historyList = document.getElementById('history-list');
+      const li = document.createElement('li');
+      li.textContent = `Rule ${rule.number}: ${rule.text}`;
+      historyList.appendChild(li);
+      // Scroll to top of history if too long
+      if (historyList.children.length > 5) {
+        historyList.removeChild(historyList.firstChild);
+      }
+    }
+
+    // Event listeners
+    document.getElementById('random-button').addEventListener('click', function() {
+      const rule = getRandomRule();
+      displayRule(rule);
+    });
+
+    document.getElementById('advice-form').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const rule = getRandomRule(); // For now, random; could implement keyword matching later
+      displayRule(rule);
+    });
+  </script>
+</body>
+</html>
