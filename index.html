@@ -404,6 +404,49 @@
       background: var(--latinum);
       color: var(--ferengi-ink);
     }
+    .modal {
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.8);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-content {
+      background: var(--card);
+      border: 1px solid var(--latinum);
+      border-radius: 18px;
+      padding: 2rem;
+      max-width: 90vw;
+      max-height: 90vh;
+      overflow-y: auto;
+      position: relative;
+    }
+    .close-btn {
+      position: absolute;
+      top: 10px;
+      right: 15px;
+      font-size: 2rem;
+      cursor: pointer;
+      color: var(--latinum);
+    }
+    .close-btn:hover {
+      color: var(--ferengi-orange);
+    }
+    #quote-canvas {
+      max-width: 100%;
+      height: auto;
+      border: 2px solid var(--latinum);
+      border-radius: 12px;
+    }
+    .modal-actions {
+      text-align: center;
+      margin-top: 1rem;
+    }
     .rule-card {
       animation: rule-appear 0.5s ease-out;
     }
@@ -482,16 +525,40 @@
       <h2>Ferengi Wisdom</h2>
       <p class='rule-number' id='rule-number'></p>
       <p class='rule-text' id='rule-text'></p>
+      <div id='viral-hook' class='viral-hook' style='margin: 1rem 0; padding: 1rem; background: rgba(255, 138, 61, 0.1); border-radius: 12px; text-align: center;'></div>
       <div class='rule-actions'>
         <button id='favorite-btn' class='action-btn'>❤️ Favorite</button>
+        <button id='generate-image-btn' class='action-btn'>📸 Generate Quote Image</button>
         <div class='share-buttons'>
           <button class='share-btn' data-platform='twitter'>🐦 Share on Twitter</button>
           <button class='share-btn' data-platform='facebook'>📘 Share on Facebook</button>
           <button class='share-btn' data-platform='linkedin'>💼 Share on LinkedIn</button>
           <button class='share-btn' data-platform='reddit'>🟠 Share on Reddit</button>
+          <button class='share-btn' data-platform='instagram' onclick='showInstagramGuide()'>📷 Instagram Guide</button>
+          <button class='share-btn' data-platform='tiktok' onclick='showTikTokGuide()'>🎵 TikTok Guide</button>
+        </div>
+      </div>
+      <div id='image-modal' class='modal' style='display: none;'>
+        <div class='modal-content'>
+          <span class='close-btn' onclick='closeModal()'>×</span>
+          <h3>Your Ferengi Quote Image</h3>
+          <canvas id='quote-canvas' width='1080' height='1080'></canvas>
+          <div class='modal-actions'>
+            <button onclick='downloadImage()'>⬇️ Download Image</button>
+            <p style='font-size: 0.9rem; margin-top: 1rem;'>Perfect for Instagram, TikTok, or any social platform!</p>
+          </div>
+        </div>
+      </div>
+      <div id='social-guide-modal' class='modal' style='display: none;'>
+        <div class='modal-content'>
+          <span class='close-btn' onclick='closeModal()'>×</span>
+          <div id='guide-content'></div>
         </div>
       </div>
       <p class='slogan'>May your profits be eternal.</p>
+      <div class='social-proof'>
+        <p style='font-size: 0.9rem; color: var(--latinum);'>🧠 Join 1,000+ entrepreneurs exploring Ferengi wisdom!</p>
+      </div>
       <div class='history'>
         <h3>Recent Consultations</h3>
         <ul id='history-list'></ul>
@@ -874,6 +941,44 @@
       favoriteBtn.textContent = isFavorited ? '💔 Unfavorite' : '❤️ Favorite';
       favoriteBtn.classList.toggle('favorited', isFavorited);
 
+      // Add viral hook
+      const viralHooks = {
+        'profit': [
+          "💰 How has this rule changed your business approach?",
+          "🚀 What's the biggest profit lesson you've learned?",
+          "🤑 Tag someone who needs this Ferengi wisdom!"
+        ],
+        'business': [
+          "🏪 How do you apply ancient wisdom to modern business?",
+          "📈 What's your favorite business hack?",
+          "🤝 Share a deal that made you think of this rule!"
+        ],
+        'negotiation': [
+          "⚖️ What's your toughest negotiation story?",
+          "🤝 How has this rule helped your deals?",
+          "🎯 Tag a negotiator who needs this wisdom!"
+        ],
+        'ethics': [
+          "🤔 Does business have absolute ethics?",
+          "⚖️ How do you balance profit and principles?",
+          "💭 What business 'gray area' have you encountered?"
+        ],
+        'personal': [
+          "👨‍👩‍👧‍👦 How does profit affect personal relationships?",
+          "❤️ What's your relationship with money?",
+          "🤗 Tag someone who embodies Ferengi spirit!"
+        ],
+        'wisdom': [
+          "🧠 What's the wisest business advice you've received?",
+          "💡 How has this rule changed your perspective?",
+          "🌟 Share your own 'rule for life'!"
+        ]
+      };
+
+      const hooks = viralHooks[rule.category] || viralHooks['wisdom'];
+      const randomHook = hooks[Math.floor(Math.random() * hooks.length)];
+      document.getElementById('viral-hook').textContent = `💭 ${randomHook}`;
+
       // Track stats
       stats.totalViews++;
       stats.popularRules[rule.number] = (stats.popularRules[rule.number] || 0) + 1;
@@ -967,8 +1072,126 @@
       localStorage.setItem('ferengiFavorites', JSON.stringify(favorites));
     });
 
+    // Generate quote image
+    document.getElementById('generate-image-btn').addEventListener('click', function() {
+      if (!currentRule) return;
+      generateQuoteImage(currentRule);
+      document.getElementById('image-modal').style.display = 'flex';
+    });
+
+    function generateQuoteImage(rule) {
+      const canvas = document.getElementById('quote-canvas');
+      const ctx = canvas.getContext('2d');
+      const width = canvas.width;
+      const height = canvas.height;
+
+      // Ferengi-themed background
+      const gradient = ctx.createLinearGradient(0, 0, width, height);
+      gradient.addColorStop(0, '#3c2f4f');
+      gradient.addColorStop(0.5, '#5a2a2a');
+      gradient.addColorStop(1, '#0b090e');
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, width, height);
+
+      // Add some Ferengi-style patterns
+      ctx.fillStyle = 'rgba(249, 217, 108, 0.1)';
+      for (let i = 0; i < 50; i++) {
+        const x = Math.random() * width;
+        const y = Math.random() * height;
+        const size = Math.random() * 3 + 1;
+        ctx.beginPath();
+        ctx.arc(x, y, size, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      // Rule number
+      ctx.fillStyle = '#ffe795';
+      ctx.font = 'bold 60px Orbitron, monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText(`Rule of Acquisition`, width / 2, 150);
+      ctx.fillText(`#${rule.number}`, width / 2, 220);
+
+      // Rule text - wrap it
+      ctx.fillStyle = '#ffffff';
+      ctx.font = '40px Share Tech Mono, monospace';
+      const words = rule.text.split(' ');
+      let line = '';
+      let y = 320;
+      const maxWidth = width - 100;
+      const lineHeight = 50;
+
+      for (let i = 0; i < words.length; i++) {
+        const testLine = line + words[i] + ' ';
+        const metrics = ctx.measureText(testLine);
+        if (metrics.width > maxWidth && i > 0) {
+          ctx.fillText(line, width / 2, y);
+          line = words[i] + ' ';
+          y += lineHeight;
+        } else {
+          line = testLine;
+        }
+      }
+      ctx.fillText(line, width / 2, y);
+
+      // Bottom branding
+      ctx.fillStyle = '#ff8a3d';
+      ctx.font = '30px Orbitron, monospace';
+      ctx.fillText('Latinum Logic', width / 2, height - 80);
+      ctx.font = '20px Share Tech Mono, monospace';
+      ctx.fillText('#StarTrek #Ferengi #RulesOfAcquisition', width / 2, height - 40);
+    }
+
+    function downloadImage() {
+      const canvas = document.getElementById('quote-canvas');
+      const link = document.createElement('a');
+      link.download = `ferengi-rule-${currentRule.number}.png`;
+      link.href = canvas.toDataURL();
+      link.click();
+    }
+
+    function closeModal() {
+      document.getElementById('image-modal').style.display = 'none';
+      document.getElementById('social-guide-modal').style.display = 'none';
+    }
+
+    function showInstagramGuide() {
+      if (!currentRule) return;
+      const content = document.getElementById('guide-content');
+      content.innerHTML = `
+        <h3>📷 Share on Instagram</h3>
+        <ol>
+          <li>Generate the quote image above</li>
+          <li>Download and save to your phone</li>
+          <li>Open Instagram and create a new post</li>
+          <li>Upload the image</li>
+          <li>Add caption: "Ferengi Rule #${currentRule.number}: ${currentRule.text} 🤑 #StarTrek #Ferengi #RulesOfAcquisition #Profit #CryptoWisdom"</li>
+          <li>Tag @latinumlogic and use relevant hashtags</li>
+        </ol>
+        <p>💡 Pro tip: Ask followers "Which Ferengi rule guides your business decisions?"</p>
+      `;
+      document.getElementById('social-guide-modal').style.display = 'flex';
+    }
+
+    function showTikTokGuide() {
+      if (!currentRule) return;
+      const content = document.getElementById('guide-content');
+      content.innerHTML = `
+        <h3>🎵 Share on TikTok</h3>
+        <ol>
+          <li>Generate the quote image above</li>
+          <li>Download and import to TikTok</li>
+          <li>Add trending audio about business/money</li>
+          <li>Use text overlay: "Ferengi Wisdom 💰"</li>
+          <li>Caption: "Ancient profit principles for modern hustlers! Rule #${currentRule.number} #StarTrek #Ferengi #BusinessTips #Crypto"</li>
+          <li>Add effects and duets for maximum engagement</li>
+        </ol>
+        <p>💡 Pro tip: Challenge viewers to share their own "business rules"</p>
+      `;
+      document.getElementById('social-guide-modal').style.display = 'flex';
+    }
+
     // Share functionality
-    document.querySelectorAll('.share-btn').forEach(btn => {
+    document.querySelectorAll('.share-btn[data-platform]').forEach(btn => {
       btn.addEventListener('click', function() {
         if (!currentRule) return;
         const platform = this.dataset.platform;
