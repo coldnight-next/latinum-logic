@@ -1,0 +1,559 @@
+/* Game Styles for Ferengi Rule Oracle */
+
+.games-section {
+  display: none;
+  margin: 2rem 0;
+  padding: 2rem;
+  background: var(--card);
+  border: 1px solid rgba(255, 231, 149, 0.35);
+  border-radius: 12px;
+}
+
+.games-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+  margin: 2rem 0;
+}
+
+.game-card {
+  background: rgba(255, 231, 149, 0.05);
+  border: 2px solid rgba(255, 231, 149, 0.2);
+  border-radius: 12px;
+  padding: 1.5rem;
+  text-align: center;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.game-card:hover {
+  border-color: var(--latinum);
+  background: rgba(255, 231, 149, 0.1);
+  transform: translateY(-5px);
+}
+
+.game-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+.game-card h3 {
+  color: var(--latinum);
+  margin-bottom: 0.5rem;
+}
+
+.game-card p {
+  color: rgba(255, 231, 149, 0.8);
+  margin-bottom: 1rem;
+  line-height: 1.4;
+}
+
+.game-btn {
+  background: var(--latinum);
+  color: var(--ferengi-ink);
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 25px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.game-btn:hover {
+  background: var(--latinum-bright);
+  transform: scale(1.05);
+}
+
+#game-container {
+  background: var(--card);
+  border: 1px solid rgba(255, 231, 149, 0.35);
+  border-radius: 12px;
+  padding: 2rem;
+  margin: 2rem 0;
+}
+
+.game-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.game-header h3 {
+  color: var(--latinum);
+  margin-bottom: 1rem;
+}
+
+.game-stats {
+  display: flex;
+  justify-content: space-around;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.game-stats span {
+  color: rgba(255, 231, 149, 0.8);
+}
+
+.game-stats strong {
+  color: var(--latinum);
+}
+
+/* Rule Matching Game */
+.matching-game {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 2rem;
+  margin: 2rem 0;
+}
+
+.rules-pool h4,
+.categories-grid h4 {
+  color: var(--latinum);
+  margin-bottom: 1rem;
+}
+
+.rules-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  max-height: 400px;
+  overflow-y: auto;
+  padding: 1rem;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+}
+
+.rule-card-draggable {
+  background: rgba(255, 231, 149, 0.1);
+  border: 1px solid rgba(255, 231, 149, 0.3);
+  border-radius: 8px;
+  padding: 0.75rem;
+  cursor: grab;
+  transition: all 0.3s ease;
+}
+
+.rule-card-draggable:hover {
+  background: rgba(255, 231, 149, 0.2);
+  transform: scale(1.02);
+}
+
+.rule-card-draggable.dragging {
+  opacity: 0.5;
+  transform: rotate(5deg);
+}
+
+.rule-number {
+  font-weight: bold;
+  color: var(--latinum);
+  font-size: 0.9rem;
+}
+
+.rule-text {
+  color: rgba(255, 231, 149, 0.9);
+  font-size: 0.8rem;
+  margin-top: 0.25rem;
+}
+
+.categories-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.category-zone {
+  background: rgba(0, 0, 0, 0.3);
+  border: 2px dashed rgba(255, 231, 149, 0.3);
+  border-radius: 8px;
+  padding: 1rem;
+  min-height: 120px;
+}
+
+.category-zone h4 {
+  margin: 0 0 0.5rem 0;
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+.drop-zone {
+  min-height: 80px;
+  border-radius: 4px;
+  transition: all 0.3s ease;
+}
+
+.drop-zone.drag-over {
+  background: rgba(255, 231, 149, 0.2);
+  border-color: var(--latinum);
+}
+
+/* Memory Game */
+.memory-game {
+  margin: 2rem 0;
+}
+
+.difficulty-selector {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.difficulty-selector label {
+  color: var(--latinum);
+  margin-right: 1rem;
+}
+
+.difficulty-selector select {
+  background: var(--ferengi-ink);
+  color: var(--latinum);
+  border: 1px solid rgba(255, 231, 149, 0.3);
+  border-radius: 4px;
+  padding: 0.5rem;
+  margin-right: 1rem;
+}
+
+.memory-grid {
+  display: grid;
+  gap: 0.5rem;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.memory-card {
+  aspect-ratio: 1;
+  perspective: 1000px;
+  cursor: pointer;
+}
+
+.card-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transition: transform 0.6s;
+  transform-style: preserve-3d;
+}
+
+.memory-card.flipped .card-inner {
+  transform: rotateY(180deg);
+}
+
+.card-front,
+.card-back {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  border: 2px solid rgba(255, 231, 149, 0.3);
+  font-weight: bold;
+}
+
+.card-front {
+  background: rgba(255, 231, 149, 0.1);
+  color: var(--latinum);
+  font-size: 2rem;
+}
+
+.card-back {
+  background: rgba(255, 231, 149, 0.2);
+  color: var(--ferengi-ink);
+  transform: rotateY(180deg);
+  padding: 0.5rem;
+}
+
+.card-number {
+  color: var(--latinum);
+  font-size: 1.2rem;
+}
+
+.card-text {
+  color: rgba(255, 231, 149, 0.9);
+  font-size: 0.8rem;
+  text-align: center;
+  line-height: 1.2;
+}
+
+.memory-card.matched {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.memory-card.matched .card-inner {
+  transform: rotateY(180deg);
+}
+
+/* Trivia Game */
+.trivia-game {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.question-display {
+  background: rgba(255, 231, 149, 0.1);
+  border: 1px solid rgba(255, 231, 149, 0.3);
+  border-radius: 12px;
+  padding: 2rem;
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.question-number {
+  color: var(--latinum);
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
+}
+
+.question-text {
+  color: rgba(255, 231, 149, 0.9);
+  font-size: 1.1rem;
+  line-height: 1.4;
+  margin-bottom: 1rem;
+}
+
+.question-timer {
+  color: var(--ferengi-orange);
+  font-weight: bold;
+}
+
+.answer-options {
+  display: grid;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.answer-option {
+  background: rgba(255, 231, 149, 0.1);
+  border: 2px solid rgba(255, 231, 149, 0.3);
+  border-radius: 8px;
+  padding: 1rem;
+  color: rgba(255, 231, 149, 0.9);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: left;
+}
+
+.answer-option:hover {
+  background: rgba(255, 231, 149, 0.2);
+  border-color: var(--latinum);
+}
+
+.answer-option.selected {
+  background: rgba(255, 231, 149, 0.3);
+  border-color: var(--latinum);
+}
+
+.answer-option.correct {
+  background: rgba(0, 255, 0, 0.2);
+  border-color: #00ff00;
+}
+
+.answer-option.incorrect {
+  background: rgba(255, 0, 0, 0.2);
+  border-color: #ff0000;
+}
+
+.lifelines {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.lifeline-btn {
+  background: rgba(255, 231, 149, 0.1);
+  border: 1px solid rgba(255, 231, 149, 0.3);
+  border-radius: 20px;
+  padding: 0.5rem 1rem;
+  color: var(--latinum);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.lifeline-btn:hover:not(:disabled) {
+  background: rgba(255, 231, 149, 0.2);
+}
+
+.lifeline-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Game Controls */
+.game-controls {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-top: 2rem;
+}
+
+.action-btn {
+  background: var(--latinum);
+  color: var(--ferengi-ink);
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 25px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.action-btn:hover {
+  background: var(--latinum-bright);
+  transform: scale(1.05);
+}
+
+.action-btn.secondary {
+  background: rgba(255, 231, 149, 0.1);
+  color: var(--latinum);
+  border: 1px solid rgba(255, 231, 149, 0.3);
+}
+
+.action-btn.secondary:hover {
+  background: rgba(255, 231, 149, 0.2);
+}
+
+/* Game Results */
+.game-results {
+  text-align: center;
+  padding: 2rem;
+  background: rgba(255, 231, 149, 0.1);
+  border: 1px solid rgba(255, 231, 149, 0.3);
+  border-radius: 12px;
+  margin: 2rem 0;
+}
+
+.game-results h3 {
+  color: var(--latinum);
+  margin-bottom: 1rem;
+}
+
+.final-score {
+  font-size: 2rem;
+  color: var(--latinum);
+  margin: 1rem 0;
+}
+
+.score-breakdown {
+  color: rgba(255, 231, 149, 0.8);
+  margin: 1rem 0;
+}
+
+.high-score-notification {
+  background: linear-gradient(45deg, var(--latinum), var(--ferengi-orange));
+  color: var(--ferengi-ink);
+  padding: 1rem;
+  border-radius: 8px;
+  margin: 1rem 0;
+  font-weight: bold;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .matching-game {
+    grid-template-columns: 1fr;
+  }
+
+  .categories-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .game-stats {
+    justify-content: center;
+    text-align: center;
+  }
+
+  .game-controls {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .action-btn {
+    width: 100%;
+    max-width: 250px;
+  }
+}
+
+/* Profit Calculator Game */
+.profit-calculator {
+  max-width: 500px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.calculator-form {
+  background: rgba(255, 231, 149, 0.1);
+  border: 1px solid rgba(255, 231, 149, 0.3);
+  border-radius: 12px;
+  padding: 2rem;
+  margin-bottom: 2rem;
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+  text-align: left;
+}
+
+.form-group label {
+  display: block;
+  color: var(--latinum);
+  margin-bottom: 0.5rem;
+  font-weight: bold;
+}
+
+.form-group input,
+.form-group select {
+  width: 100%;
+  background: var(--ferengi-ink);
+  color: var(--latinum);
+  border: 1px solid rgba(255, 231, 149, 0.3);
+  border-radius: 4px;
+  padding: 0.75rem;
+  font-size: 1rem;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+  outline: none;
+  border-color: var(--latinum);
+}
+
+.calculation-result {
+  background: rgba(255, 231, 149, 0.2);
+  border: 2px solid var(--latinum);
+  border-radius: 12px;
+  padding: 2rem;
+  margin: 2rem 0;
+}
+
+.profit-amount {
+  font-size: 2.5rem;
+  color: var(--latinum);
+  font-weight: bold;
+  margin: 1rem 0;
+}
+
+.ferengi-advice {
+  color: rgba(255, 231, 149, 0.9);
+  font-style: italic;
+  margin: 1rem 0;
+  line-height: 1.4;
+}
+
+.relevant-rule {
+  background: rgba(0, 0, 0, 0.3);
+  border-left: 4px solid var(--latinum);
+  padding: 1rem;
+  margin: 1rem 0;
+  text-align: left;
+}
+
+.relevant-rule .rule-number {
+  color: var(--latinum);
+  font-weight: bold;
+}
+
+.relevant-rule .rule-text {
+  color: rgba(255, 231, 149, 0.9);
+  margin-top: 0.5rem;
+}

@@ -26,10 +26,20 @@
   <link rel='preconnect' href='https://fonts.googleapis.com'>
   <link rel='preconnect' href='https://fonts.gstatic.com' crossorigin>
   <link href='https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700&family=Share+Tech+Mono&display=swap' rel='stylesheet'>
+  <link rel='stylesheet' href='styles.css'>
+  <link rel='stylesheet' href='game-styles.css'>
 
   <!-- Google Analytics -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-G32LH6KSJ0"></script>
   <script>
+    // Protect Math.random from being overridden
+    window.originalMathRandom = Math.random;
+    Object.defineProperty(Math, 'random', {
+      value: window.originalMathRandom,
+      writable: false,
+      configurable: false
+    });
+
     window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);}
     gtag('js', new Date());
@@ -86,22 +96,89 @@
       z-index: 1;
       margin-bottom: 2rem;
       position: relative;
+      width: 100%;
+      max-width: 1200px;
+      padding-top: 4rem; /* Add space for header controls */
     }
-    .header-controls {
+    .floating-controls {
       position: absolute;
+      z-index: 3000;
+    }
+
+    .floating-controls .theme-btn {
+      position: absolute;
+    }
+
+    #games-toggle {
       top: 1rem;
+      left: 2rem;
+    }
+
+    #theme-toggle {
+      top: 1rem;
+      right: 2rem;
+    }
+
+    #sound-toggle {
+      top: 3rem;
       right: 1rem;
+    }
+
+    #achievements-toggle {
+      top: 1rem;
+      left: 6rem;
+    }
+
+    /* Theme selector is now positioned dynamically by themes.js */
+
+    @media (max-width: 768px) {
+      .masthead {
+        padding-top: 5rem;
+      }
+
+      #games-toggle {
+        top: 0.5rem;
+        left: 1rem;
+      }
+
+      #theme-toggle {
+        top: 0.5rem;
+        right: 1rem;
+      }
+
+      #sound-toggle {
+        top: 0.5rem;
+        right: 1rem;
+      }
+
+      #achievements-toggle {
+        top: 0.5rem;
+        left: 4rem;
+      }
+
+      /* Theme selector positioning is now handled by themes.js */
+
+      .theme-btn {
+        width: 44px;
+        height: 44px;
+        font-size: 1rem;
+      }
     }
     .theme-btn {
       background: rgba(255, 231, 149, 0.1);
       border: 1px solid rgba(255, 231, 149, 0.3);
       border-radius: 50%;
-      width: 40px;
-      height: 40px;
+      width: 44px;
+      height: 44px;
       color: var(--latinum);
       cursor: pointer;
       font-size: 1.2rem;
       transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 44px;
+      min-height: 44px;
     }
     .theme-btn:hover {
       background: var(--latinum);
@@ -534,9 +611,13 @@
   </style>
 </head>
 <body>
+  <canvas id='particle-canvas'></canvas>
+  <div class='starfield'></div>
   <header class='masthead'>
-    <div class='header-controls'>
-      <button id='theme-toggle' class='theme-btn' aria-label='Toggle between dark and light theme'>🌙</button>
+    <div class='floating-controls'>
+      <button id='games-toggle' class='theme-btn' aria-label='Play Ferengi Games' onclick="toggleGamesSection()">🎮</button>
+      <button id='sound-toggle' class='theme-btn' aria-label='Toggle Sound Effects'>🔊</button>
+      <button id='achievements-toggle' class='theme-btn' aria-label='View Achievements'>🏆</button>
     </div>
     <h1>Latinum Logic</h1>
     <p class='tagline'>Submit your scheme. Receive Ferengi-sanctioned wisdom.</p>
@@ -562,9 +643,10 @@
       </div>
       <form id='advice-form'>
         <label for='question'>What profit dilemma plagues you?</label>
-        <textarea id='question' placeholder='Describe your situation, entrepreneur. The lobes are listening...' aria-label='Question for Ferengi advice'></textarea>
+        <textarea id='question' placeholder='Describe your situation, entrepreneur. The lobes are listening...' aria-label='Question for Ferengi advice' maxlength='500'></textarea>
+        <div id='form-feedback' class='form-feedback' style='display: none;'></div>
         <div class='controls'>
-          <button type='submit'>Consult the Rules</button>
+          <button type='submit' id='submit-button'>Consult the Rules</button>
           <button type='button' class='secondary' id='random-button'>Deal Me a Random Rule</button>
         </div>
       </form>
@@ -578,30 +660,32 @@
       <div class='rule-actions'>
         <button id='favorite-btn' class='action-btn'>❤️ Favorite</button>
         <button id='generate-image-btn' class='action-btn'>📸 Generate Quote Image</button>
-        <div class='share-buttons'>
-          <button class='share-btn' data-platform='twitter'>🐦 Share on Twitter</button>
-          <button class='share-btn' data-platform='facebook'>📘 Share on Facebook</button>
-          <button class='share-btn' data-platform='linkedin'>💼 Share on LinkedIn</button>
-          <button class='share-btn' data-platform='reddit'>🟠 Share on Reddit</button>
-          <button class='share-btn' data-platform='instagram' onclick='showInstagramGuide()'>📷 Instagram Guide</button>
-          <button class='share-btn' data-platform='tiktok' onclick='showTikTokGuide()'>🎵 TikTok Guide</button>
+        <button id='goto-challenge-btn' class='action-btn'>🎯 Start Challenge</button>
+        <div class='share-buttons' role='group' aria-label='Share this Ferengi rule'>
+          <button class='share-btn' data-platform='twitter' aria-label='Share on Twitter'>🐦 Share on Twitter</button>
+          <button class='share-btn' data-platform='facebook' aria-label='Share on Facebook'>📘 Share on Facebook</button>
+          <button class='share-btn' data-platform='linkedin' aria-label='Share on LinkedIn'>💼 Share on LinkedIn</button>
+          <button class='share-btn' data-platform='reddit' aria-label='Share on Reddit'>🟠 Share on Reddit</button>
+          <button class='share-btn' data-platform='instagram' onclick='showInstagramGuide()' aria-label='Get Instagram sharing guide'>📷 Instagram Guide</button>
+          <button class='share-btn' data-platform='tiktok' onclick='showTikTokGuide()' aria-label='Get TikTok sharing guide'>🎵 TikTok Guide</button>
         </div>
       </div>
-      <div id='image-modal' class='modal' style='display: none;'>
+      <div id='image-modal' class='modal' style='display: none;' role='dialog' aria-labelledby='image-modal-title' aria-describedby='image-modal-desc'>
         <div class='modal-content'>
-          <span class='close-btn' onclick='closeModal()'>×</span>
-          <h3>Your Ferengi Quote Image</h3>
-          <canvas id='quote-canvas' width='1080' height='1080'></canvas>
+          <span class='close-btn' onclick='closeModal()' aria-label='Close modal'>×</span>
+          <h3 id='image-modal-title'>Your Ferengi Quote Image</h3>
+          <p id='image-modal-desc' style='display: none;'>Download and share your custom Ferengi rule image</p>
+          <canvas id='quote-canvas' width='1080' height='1080' aria-label='Ferengi rule quote image'></canvas>
           <div class='modal-actions'>
-            <button onclick='downloadImage()'>⬇️ Download Image</button>
+            <button onclick='downloadImage()' aria-label='Download the quote image'>⬇️ Download Image</button>
             <p style='font-size: 0.9rem; margin-top: 1rem;'>Perfect for Instagram, TikTok, or any social platform!</p>
           </div>
         </div>
       </div>
-      <div id='social-guide-modal' class='modal' style='display: none;'>
+      <div id='social-guide-modal' class='modal' style='display: none;' role='dialog' aria-labelledby='guide-modal-title'>
         <div class='modal-content'>
-          <span class='close-btn' onclick='closeModal()'>×</span>
-          <div id='guide-content'></div>
+          <span class='close-btn' onclick='closeModal()' aria-label='Close guide'>×</span>
+          <div id='guide-content' role='document'></div>
         </div>
       </div>
       <p class='slogan'>May your profits be eternal.</p>
@@ -612,7 +696,27 @@
         <h3>Recent Consultations</h3>
         <ul id='history-list'></ul>
       </div>
+
+      <!-- Challenge Panel (hidden by default) -->
+      <div id='challenge-content' style='display: none; margin-top: 2rem; padding: 1rem; background: rgba(255,255,255,0.1); border-radius: 10px;'>
+        <div id='countdown' style='text-align: center; font-size: 1.2rem; margin-bottom: 1rem;'></div>
+        <div id='question-display' style='margin-bottom: 1rem;'></div>
+        <div id='options-display' style='margin-bottom: 1rem;'></div>
+        <div style='display: flex; justify-content: space-between; align-items: center;'>
+          <div id='current-q' style='font-size: 0.9rem;'></div>
+          <div id='quiz-timer' style='font-size: 0.9rem;'></div>
+          <div>
+            <span id='streak-flame'>🔥</span>
+            <span id='streak-count'>0</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Game Container -->
+      <div id='game-container' style='display: none; margin-top: 2rem;'></div>
     </section>
+
+
   </main>
   <footer>
     <p>&copy; 2024 Ferengi Commerce Authority. All Rights Reserved. | <a href="#" id="easter-egg">About the Ferengi</a></p>
@@ -622,8 +726,8 @@
     </div>
   </footer>
   <script>
-    // Ferengi Rules of Acquisition with categories
-    const categories = {
+    // Global utilities and shared state - loaded before all modules
+    window.categories = {
       'profit': 'Profit & Finance',
       'business': 'Business & Commerce',
       'negotiation': 'Negotiation & Deals',
@@ -631,6 +735,52 @@
       'personal': 'Personal Life',
       'wisdom': 'General Wisdom'
     };
+
+    // Toast notification system (replaces alert() calls)
+    window.showToast = function(message, duration) {
+      duration = duration || 3000;
+      var toast = document.createElement('div');
+      toast.className = 'toast-notification';
+      toast.textContent = message;
+      document.body.appendChild(toast);
+      // Trigger reflow for animation
+      toast.offsetHeight;
+      toast.classList.add('show');
+      setTimeout(function() {
+        toast.classList.remove('show');
+        setTimeout(function() {
+          if (toast.parentNode) toast.parentNode.removeChild(toast);
+        }, 400);
+      }, duration);
+    };
+
+    // Fisher-Yates shuffle - unbiased randomization
+    // Optional randomFn parameter for seeded/deterministic shuffles
+    window.shuffleArray = function(array, randomFn) {
+      const arr = [...array];
+      const rng = randomFn || Math.random;
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(rng() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      return arr;
+    };
+  </script>
+  <script src='particles.js'></script>
+  <script src='animations.js'></script>
+  <script src='dashboard.js'></script>
+  <script src='themes.js'></script>
+  <script src='games.js'></script>
+  <script src='daily-challenges.js'></script>
+  <script src='enhanced-reveals.js'></script>
+  <script src='sound-system.js'></script>
+  <script src='achievement-system.js'></script>
+  <script src='easter-eggs.js'></script>
+  <script src='enhanced-visuals.js'></script>
+  <script>
+    // Ferengi Rules of Acquisition with categories
+    // categories is already defined globally in the early script block
+    const categories = window.categories;
 
     const rules = [
       { number: 1, text: "Once you have their money, never give it back", category: 'profit' },
@@ -921,6 +1071,10 @@
       { number: 286, text: "When Morn leaves it is all over" }
     ];
 
+    // Make rules globally accessible for games
+    window.rules = rules;
+    window.ferengiRules = rules;
+
     // Function to assign categories to rules
     function assignCategories() {
       rules.forEach(rule => {
@@ -954,10 +1108,35 @@
     const dailyRule = getRuleOfDay();
     document.getElementById('daily-rule-text').textContent = `"${dailyRule.text}" (Rule #${dailyRule.number})`;
 
+    // Initialize enhanced features with error boundaries
+    try {
+      if (window.animationController && typeof window.animationController.initDynamicBackground === 'function') {
+        window.animationController.initDynamicBackground();
+      }
+    } catch (error) {
+      console.error('Failed to initialize dynamic background:', error);
+    }
+
+    try {
+      if (window.dashboardManager && typeof window.dashboardManager.showDashboard === 'function') {
+        window.dashboardManager.showDashboard();
+      } else {
+        console.warn('Dashboard manager not available');
+      }
+    } catch (error) {
+      console.error('Failed to initialize dashboard:', error);
+    }
+
     let currentCategory = 'all';
     let searchQuery = '';
-    let favorites = JSON.parse(localStorage.getItem('ferengiFavorites') || '[]');
-    let stats = JSON.parse(localStorage.getItem('ferengiStats') || '{"totalViews": 0, "popularRules": {}}');
+    let favorites;
+    try {
+      favorites = JSON.parse(localStorage.getItem('ferengiFavorites') || '[]');
+      if (!Array.isArray(favorites)) favorites = [];
+    } catch (e) {
+      console.warn('Failed to load favorites from localStorage:', e);
+      favorites = [];
+    }
     let currentRule = null;
 
     // Function to get filtered rules
@@ -976,19 +1155,51 @@
     }
 
     // Function to display a rule
-    function displayRule(rule) {
-      currentRule = rule;
-      document.getElementById('rule-number').textContent = `Rule of Acquisition #${rule.number}`;
-      document.getElementById('rule-text').textContent = rule.text;
-      const resultPanel = document.getElementById('result-panel');
-      resultPanel.style.display = 'block';
-      resultPanel.classList.add('rule-card');
+    async function displayRule(rule) {
+      try {
+        console.log('Displaying rule:', rule);
+        currentRule = rule;
+        const resultPanel = document.getElementById('result-panel');
+
+        if (!resultPanel) {
+          console.error('Result panel not found!');
+          return;
+        }
+
+        resultPanel.style.display = 'block';
+
+        // Use enhanced reveal system for cinematic experience
+        if (window.enhancedRevealSystem && typeof window.enhancedRevealSystem.revealRule === 'function') {
+          console.log('Using enhanced reveal system');
+          await window.enhancedRevealSystem.revealRule(rule, resultPanel);
+        } else {
+          console.warn('Enhanced reveal system not available, using basic display');
+          resultPanel.innerHTML = `
+            <p class="rule-number">Rule of Acquisition #${rule.number}</p>
+            <p class="rule-text">${rule.text}</p>
+          `;
+        }
+      } catch (error) {
+        console.error('Failed to display rule:', error);
+        // Fallback: basic display
+        const resultPanel = document.getElementById('result-panel');
+        if (resultPanel) {
+          resultPanel.innerHTML = `
+            <h2>Ferengi Wisdom</h2>
+            <p class="rule-number">Rule of Acquisition #${rule ? rule.number : 'Unknown'}</p>
+            <p class="rule-text">${rule ? rule.text : 'Wisdom loading failed. Please try again.'}</p>
+          `;
+          resultPanel.style.display = 'block';
+        }
+      }
 
       // Update favorite button
       const favoriteBtn = document.getElementById('favorite-btn');
-      const isFavorited = favorites.includes(rule.number);
-      favoriteBtn.textContent = isFavorited ? '💔 Unfavorite' : '❤️ Favorite';
-      favoriteBtn.classList.toggle('favorited', isFavorited);
+      if (favoriteBtn) {
+        const isFavorited = favorites.includes(rule.number);
+        favoriteBtn.textContent = isFavorited ? '💔 Unfavorite' : '❤️ Favorite';
+        favoriteBtn.classList.toggle('favorited', isFavorited);
+      }
 
       // Add viral hook
       const viralHooks = {
@@ -1026,12 +1237,15 @@
 
       const hooks = viralHooks[rule.category] || viralHooks['wisdom'];
       const randomHook = hooks[Math.floor(Math.random() * hooks.length)];
-      document.getElementById('viral-hook').textContent = `💭 ${randomHook}`;
+      const viralHookElement = document.getElementById('viral-hook');
+      if (viralHookElement) {
+        viralHookElement.textContent = `💭 ${randomHook}`;
+      }
 
-      // Track stats
-      stats.totalViews++;
-      stats.popularRules[rule.number] = (stats.popularRules[rule.number] || 0) + 1;
-      localStorage.setItem('ferengiStats', JSON.stringify(stats));
+      // Track stats with new dashboard system
+      if (window.dashboardManager) {
+        dashboardManager.trackRuleView(rule.number);
+      }
 
       // Add to history
       const historyList = document.getElementById('history-list');
@@ -1044,22 +1258,7 @@
       }
     }
 
-    // Theme toggle functionality
-    const themeToggle = document.getElementById('theme-toggle');
-    let isDark = true;
-    themeToggle.addEventListener('click', function() {
-      isDark = !isDark;
-      document.documentElement.style.setProperty('--latinum', isDark ? '#f9d96c' : '#2c3e50');
-      document.documentElement.style.setProperty('--latinum-bright', isDark ? '#ffe795' : '#34495e');
-      document.documentElement.style.setProperty('--ferengi-orange', isDark ? '#ff8a3d' : '#e67e22');
-      document.documentElement.style.setProperty('--ferengi-deep', isDark ? '#5a2a2a' : '#8e44ad');
-      document.documentElement.style.setProperty('--ferengi-ink', isDark ? '#0b090e' : '#ecf0f1');
-      document.documentElement.style.setProperty('--card', isDark ? 'rgba(18, 12, 24, 0.75)' : 'rgba(255, 255, 255, 0.9)');
-      document.body.style.background = isDark ?
-        'radial-gradient(circle at top, #3c2f4f 0%, #120b1f 45%, #040208 100%)' :
-        'radial-gradient(circle at top, #bdc3c7 0%, #95a5a6 45%, #7f8c8d 100%)';
-      themeToggle.textContent = isDark ? '🌙' : '☀️';
-    });
+    // Theme functionality is now handled by themes.js for proper persistence
 
     // Search functionality
     const searchInput = document.getElementById('search-input');
@@ -1086,6 +1285,27 @@
       }
     }
 
+    // Add micro-interactions to buttons
+    if (window.animationController) {
+      document.querySelectorAll('button').forEach(btn => {
+        animationController.addGlowEffect(btn);
+        btn.addEventListener('mousedown', () => animationController.buttonPress(btn));
+      });
+    }
+
+    // Keyboard support for modals
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        const imageModal = document.getElementById('image-modal');
+        const guideModal = document.getElementById('social-guide-modal');
+        if (imageModal && imageModal.style.display === 'flex') {
+          closeModal();
+        } else if (guideModal && guideModal.style.display === 'flex') {
+          closeModal();
+        }
+      }
+    });
+
     // Event listeners
     document.getElementById('random-button').addEventListener('click', function() {
       const rule = getRandomRule();
@@ -1094,9 +1314,58 @@
 
     document.getElementById('advice-form').addEventListener('submit', function(e) {
       e.preventDefault();
-      const rule = getRandomRule();
-      displayRule(rule);
+
+      const questionInput = document.getElementById('question');
+      const submitButton = document.getElementById('submit-button');
+      const feedbackDiv = document.getElementById('form-feedback');
+
+      // Validate input
+      const question = questionInput.value.trim();
+      if (!question) {
+        showFormFeedback('Please describe your profit dilemma first.', 'error');
+        questionInput.focus();
+        return;
+      }
+
+      if (question.length < 10) {
+        showFormFeedback('Please provide more detail about your situation (at least 10 characters).', 'error');
+        questionInput.focus();
+        return;
+      }
+
+      // Show loading state
+      submitButton.disabled = true;
+      submitButton.textContent = 'Consulting the Rules...';
+      showFormFeedback('The lobes are analyzing your situation...', 'loading');
+
+      // Simulate processing time for better UX
+      setTimeout(() => {
+        const rule = getRandomRule();
+        displayRule(rule);
+
+        // Reset form state
+        submitButton.disabled = false;
+        submitButton.textContent = 'Consult the Rules';
+        showFormFeedback('Wisdom delivered! May your profits be eternal.', 'success');
+
+        // Hide success message after 3 seconds
+        setTimeout(() => {
+          hideFormFeedback();
+        }, 3000);
+      }, 1000);
     });
+
+    function showFormFeedback(message, type) {
+      const feedbackDiv = document.getElementById('form-feedback');
+      feedbackDiv.textContent = message;
+      feedbackDiv.className = `form-feedback ${type}`;
+      feedbackDiv.style.display = 'block';
+    }
+
+    function hideFormFeedback() {
+      const feedbackDiv = document.getElementById('form-feedback');
+      feedbackDiv.style.display = 'none';
+    }
 
     // Easter egg
     document.getElementById('easter-egg').addEventListener('click', function(e) {
@@ -1117,90 +1386,183 @@
         favorites.push(currentRule.number);
         this.textContent = '💔 Unfavorite';
         this.classList.add('favorited');
+
+        // Track favorite and create sparkles
+        if (window.dashboardManager && typeof window.dashboardManager.trackFavorite === 'function') {
+          window.dashboardManager.trackFavorite(currentRule.number);
+        }
+        const rect = this.getBoundingClientRect();
+        if (window.createSparkles && typeof window.createSparkles === 'function') {
+          window.createSparkles(rect.left + rect.width / 2, rect.top + rect.height / 2);
+        }
+
+        // Play sound effect
+        if (window.themeManager && typeof window.themeManager.playSound === 'function') {
+          window.themeManager.playSound('favorite');
+        }
       }
-      localStorage.setItem('ferengiFavorites', JSON.stringify(favorites));
+      try {
+        localStorage.setItem('ferengiFavorites', JSON.stringify(favorites));
+      } catch (e) {
+        console.warn('Failed to save favorites to localStorage:', e);
+      }
+    });
+
+    // Navigate to daily challenge section
+    document.getElementById('goto-challenge-btn').addEventListener('click', function() {
+      const challengeCard = document.querySelector('.daily-challenge-card');
+      if (challengeCard) {
+        challengeCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        // Trigger the start button if challenge is pending
+        setTimeout(function() {
+          const startBtn = challengeCard.querySelector('#start-challenge-btn');
+          if (startBtn) startBtn.click();
+        }, 600);
+      } else if (window.showToast) {
+        window.showToast('Daily challenge is loading...');
+      }
     });
 
     // Generate quote image
     document.getElementById('generate-image-btn').addEventListener('click', function() {
       if (!currentRule) return;
+
+      // Show loading state
+      const originalText = this.textContent;
+      this.textContent = '🎨 Generating...';
+      this.disabled = true;
+
+      // Generate the image
       generateQuoteImage(currentRule);
+
+      // Show modal with image
       document.getElementById('image-modal').style.display = 'flex';
+
+      // Reset button state
+      this.textContent = originalText;
+      this.disabled = false;
+
+      // Focus the close button for accessibility
+      setTimeout(() => {
+        const closeBtn = document.querySelector('#image-modal .close-btn');
+        if (closeBtn) closeBtn.focus();
+      }, 100);
     });
 
     function generateQuoteImage(rule) {
-      const canvas = document.getElementById('quote-canvas');
-      const ctx = canvas.getContext('2d');
-      const width = canvas.width;
-      const height = canvas.height;
-
-      // Ferengi-themed background
-      const gradient = ctx.createLinearGradient(0, 0, width, height);
-      gradient.addColorStop(0, '#3c2f4f');
-      gradient.addColorStop(0.5, '#5a2a2a');
-      gradient.addColorStop(1, '#0b090e');
-      ctx.fillStyle = gradient;
-      ctx.fillRect(0, 0, width, height);
-
-      // Add some Ferengi-style patterns
-      ctx.fillStyle = 'rgba(249, 217, 108, 0.1)';
-      for (let i = 0; i < 50; i++) {
-        const x = Math.random() * width;
-        const y = Math.random() * height;
-        const size = Math.random() * 3 + 1;
-        ctx.beginPath();
-        ctx.arc(x, y, size, 0, Math.PI * 2);
-        ctx.fill();
-      }
-
-      // Rule number
-      ctx.fillStyle = '#ffe795';
-      ctx.font = 'bold 60px Orbitron, monospace';
-      ctx.textAlign = 'center';
-      ctx.fillText(`Rule of Acquisition`, width / 2, 150);
-      ctx.fillText(`#${rule.number}`, width / 2, 220);
-
-      // Rule text - wrap it
-      ctx.fillStyle = '#ffffff';
-      ctx.font = '40px Share Tech Mono, monospace';
-      const words = rule.text.split(' ');
-      let line = '';
-      let y = 320;
-      const maxWidth = width - 100;
-      const lineHeight = 50;
-
-      for (let i = 0; i < words.length; i++) {
-        const testLine = line + words[i] + ' ';
-        const metrics = ctx.measureText(testLine);
-        if (metrics.width > maxWidth && i > 0) {
-          ctx.fillText(line, width / 2, y);
-          line = words[i] + ' ';
-          y += lineHeight;
-        } else {
-          line = testLine;
+      try {
+        const canvas = document.getElementById('quote-canvas');
+        if (!canvas) {
+          throw new Error('Canvas element not found');
         }
-      }
-      ctx.fillText(line, width / 2, y);
 
-      // Bottom branding
-      ctx.fillStyle = '#ff8a3d';
-      ctx.font = '30px Orbitron, monospace';
-      ctx.fillText('Latinum Logic', width / 2, height - 80);
-      ctx.font = '20px Share Tech Mono, monospace';
-      ctx.fillText('#StarTrek #Ferengi #RulesOfAcquisition', width / 2, height - 40);
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+          throw new Error('Canvas 2D context not available');
+        }
+
+        const width = canvas.width;
+        const height = canvas.height;
+
+        // Clear canvas first
+        ctx.clearRect(0, 0, width, height);
+
+        // Ferengi-themed background
+        const gradient = ctx.createLinearGradient(0, 0, width, height);
+        gradient.addColorStop(0, '#3c2f4f');
+        gradient.addColorStop(0.5, '#5a2a2a');
+        gradient.addColorStop(1, '#0b090e');
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, width, height);
+
+        // Add some Ferengi-style patterns
+        ctx.fillStyle = 'rgba(249, 217, 108, 0.1)';
+        for (let i = 0; i < 50; i++) {
+          const x = Math.random() * width;
+          const y = Math.random() * height;
+          const size = Math.random() * 3 + 1;
+          ctx.beginPath();
+          ctx.arc(x, y, size, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        // Rule number
+        ctx.fillStyle = '#ffe795';
+        ctx.font = 'bold 60px Orbitron, monospace';
+        ctx.textAlign = 'center';
+        ctx.fillText(`Rule of Acquisition`, width / 2, 150);
+        ctx.fillText(`#${rule.number}`, width / 2, 220);
+
+        // Rule text - wrap it
+        ctx.fillStyle = '#ffffff';
+        ctx.font = '40px Share Tech Mono, monospace';
+        const words = rule.text.split(' ');
+        let line = '';
+        let y = 320;
+        const maxWidth = width - 100;
+        const lineHeight = 50;
+
+        for (let i = 0; i < words.length; i++) {
+          const testLine = line + words[i] + ' ';
+          const metrics = ctx.measureText(testLine);
+          if (metrics.width > maxWidth && i > 0) {
+            ctx.fillText(line, width / 2, y);
+            line = words[i] + ' ';
+            y += lineHeight;
+          } else {
+            line = testLine;
+          }
+        }
+        ctx.fillText(line, width / 2, y);
+
+        // Bottom branding
+        ctx.fillStyle = '#ff8a3d';
+        ctx.font = '30px Orbitron, monospace';
+        ctx.fillText('Latinum Logic', width / 2, height - 80);
+        ctx.font = '20px Share Tech Mono, monospace';
+        ctx.fillText('#StarTrek #Ferengi #RulesOfAcquisition', width / 2, height - 40);
+
+      } catch (error) {
+        console.error('Failed to generate quote image:', error);
+        alert('Sorry, there was an error generating the quote image. Please try again.');
+      }
     }
 
     function downloadImage() {
-      const canvas = document.getElementById('quote-canvas');
-      const link = document.createElement('a');
-      link.download = `ferengi-rule-${currentRule.number}.png`;
-      link.href = canvas.toDataURL();
-      link.click();
+      try {
+        const canvas = document.getElementById('quote-canvas');
+        if (!canvas) {
+          throw new Error('Canvas element not found for download');
+        }
+
+        const dataURL = canvas.toDataURL('image/png');
+        if (!dataURL || dataURL === 'data:,') {
+          throw new Error('Failed to generate image data');
+        }
+
+        const link = document.createElement('a');
+        link.download = `ferengi-rule-${currentRule ? currentRule.number : 'unknown'}.png`;
+        link.href = dataURL;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        // Close modal after successful download
+        setTimeout(() => closeModal(), 500);
+      } catch (error) {
+        console.error('Failed to download image:', error);
+        alert('Sorry, there was an error downloading the image. Please try again.');
+      }
     }
 
     function closeModal() {
       document.getElementById('image-modal').style.display = 'none';
       document.getElementById('social-guide-modal').style.display = 'none';
+      // Return focus to the trigger button if it exists
+      const generateBtn = document.getElementById('generate-image-btn');
+      if (generateBtn) {
+        generateBtn.focus();
+      }
     }
 
     function showInstagramGuide() {
@@ -1264,10 +1626,72 @@
         }
 
         if (shareUrl) {
-          window.open(shareUrl, '_blank', 'width=600,height=400');
+          try {
+            const shareWindow = window.open(shareUrl, '_blank', 'width=600,height=400');
+            if (!shareWindow) {
+              alert('Please allow popups for this site to share content.');
+              return;
+            }
+          } catch (e) {
+            alert('Sharing failed. Please try again.');
+            return;
+          }
+
+          // Track share
+          if (window.dashboardManager && typeof window.dashboardManager.trackShare === 'function') {
+            window.dashboardManager.trackShare();
+          }
+          // Play sound effect
+          if (window.themeManager && typeof window.themeManager.playSound === 'function') {
+            window.themeManager.playSound('coin-clink');
+          }
         }
       });
     });
+
+    // Simple games toggle function
+    function toggleGamesSection() {
+      // Hide main sections
+      const sections = document.querySelectorAll('.panel');
+      sections.forEach(section => {
+        if (!section.classList.contains('games-section')) {
+          section.style.display = 'none';
+        }
+      });
+
+      // Use game manager if available
+      if (window.gameManager && typeof window.gameManager.showGamesSection === 'function') {
+        window.gameManager.showGamesSection();
+      } else {
+        console.warn('Game manager not available for games toggle');
+        alert('Games are loading... Please wait a moment and try again.');
+      }
+    }
+
+    // Also bind to game buttons in the backup section
+    document.addEventListener('click', function(e) {
+      if (e.target.classList.contains('game-btn')) {
+        const gameType = e.target.dataset.game;
+        console.log('Game button clicked:', gameType);
+
+        if (window.gameManager) {
+          window.gameManager.startGame(gameType);
+        } else {
+          if (window.showToast) window.showToast('Game system is loading... Please try again in a moment.');
+          else alert('Game system is loading... Please try again in a moment.');
+        }
+      }
+    });
+  </script>
+  <script>
+    // Register Service Worker for offline support
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', function() {
+        navigator.serviceWorker.register('/sw.js').catch(function() {
+          // SW registration failed silently (expected on file:// protocol)
+        });
+      });
+    }
   </script>
 </body>
 </html>
