@@ -74,6 +74,10 @@ class GameManager {
       </div>
 
       <div id="game-container" style="display: none;"></div>
+
+      <div class="game-controls" style="margin-top: 1rem;">
+        <button id="games-back" class="action-btn secondary">← Back to Main</button>
+      </div>
     `;
 
     // Insert games section into the main content area
@@ -113,6 +117,24 @@ class GameManager {
     } else {
       console.error('Games toggle button not found!');
     }
+
+    const gamesBack = document.getElementById('games-back');
+    if (gamesBack) {
+      gamesBack.addEventListener('click', () => {
+        this.hideGamesSection();
+      });
+    }
+  }
+
+  hideGamesSection() {
+    const sections = document.querySelectorAll('.panel');
+    sections.forEach(section => {
+      if (section.classList.contains('games-section')) {
+        section.style.display = 'none';
+      } else {
+        section.style.display = '';
+      }
+    });
   }
 
   showGamesSection() {
@@ -171,9 +193,16 @@ class GameManager {
     }
 
     const gamesSection = document.querySelector('.games-section');
-    const gameContainer = document.getElementById('game-container');
+    const gameContainer = gamesSection ? gamesSection.querySelector('#game-container') : document.getElementById('game-container');
 
-    gamesSection.style.display = 'none';
+    // Hide section children except game container and back button
+    if (gamesSection) {
+      Array.from(gamesSection.children).forEach(child => {
+        if (child.id !== 'game-container' && !child.querySelector('#games-back')) {
+          child.style.display = 'none';
+        }
+      });
+    }
     gameContainer.style.display = 'block';
 
     switch(gameType) {
@@ -194,9 +223,16 @@ class GameManager {
 
   endGame() {
     const gamesSection = document.querySelector('.games-section');
-    const gameContainer = document.getElementById('game-container');
+    const gameContainer = gamesSection ? gamesSection.querySelector('#game-container') : document.getElementById('game-container');
 
-    gamesSection.style.display = 'block';
+    // Restore section children visibility
+    if (gamesSection) {
+      Array.from(gamesSection.children).forEach(child => {
+        if (child.id !== 'game-container') {
+          child.style.display = '';
+        }
+      });
+    }
     gameContainer.style.display = 'none';
     gameContainer.innerHTML = '';
     this.currentGame = null;
@@ -981,6 +1017,7 @@ class RuleTriviaGame {
 
   updateTimer() {
     const timerEl = document.getElementById('trivia-timer');
+    if (!timerEl) return;
     timerEl.textContent = this.timeLeft;
 
     if (this.timeLeft <= 5) {
@@ -995,8 +1032,10 @@ class RuleTriviaGame {
   }
 
   updateUI() {
-    document.getElementById('trivia-score').textContent = this.score;
-    document.getElementById('trivia-progress').textContent = `${this.currentQuestionIndex + 1}/10`;
+    const scoreEl = document.getElementById('trivia-score');
+    const progressEl = document.getElementById('trivia-progress');
+    if (scoreEl) scoreEl.textContent = this.score;
+    if (progressEl) progressEl.textContent = `${this.currentQuestionIndex + 1}/10`;
   }
 
   nextQuestion() {
@@ -1279,13 +1318,15 @@ class MemoryChallengeGame {
   updateTimer() {
     const minutes = Math.floor(this.timeLeft / 60);
     const seconds = this.timeLeft % 60;
-    document.getElementById('memory-timer').textContent =
-      `${minutes}:${seconds.toString().padStart(2, '0')}`;
+    const timerEl = document.getElementById('memory-timer');
+    if (timerEl) timerEl.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
   }
 
   updateUI() {
-    document.getElementById('memory-score').textContent = this.score;
-    document.getElementById('memory-moves').textContent = this.moves;
+    const scoreEl = document.getElementById('memory-score');
+    const movesEl = document.getElementById('memory-moves');
+    if (scoreEl) scoreEl.textContent = this.score;
+    if (movesEl) movesEl.textContent = this.moves;
   }
 
   endGame(won = false) {

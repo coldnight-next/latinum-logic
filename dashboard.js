@@ -24,10 +24,12 @@ class DashboardManager {
       // Ensure all required properties exist with proper defaults
       const result = { ...defaultStats, ...saved };
 
-      // Convert rulesViewed array back to Set if it exists
-      if (result.rulesViewed && Array.isArray(result.rulesViewed)) {
+      // Convert rulesViewed back to Set (handles array, plain object from JSON.stringify(Set), or missing)
+      if (result.rulesViewed instanceof Set) {
+        // Already a Set, no conversion needed
+      } else if (Array.isArray(result.rulesViewed)) {
         result.rulesViewed = new Set(result.rulesViewed);
-      } else if (!result.rulesViewed) {
+      } else {
         result.rulesViewed = new Set();
       }
 

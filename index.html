@@ -56,8 +56,11 @@
       --ferengi-ink: #0b090e;
       --card: rgba(18, 12, 24, 0.75);
     }
-    * {
+    *, *::before, *::after {
       box-sizing: border-box;
+    }
+    html {
+      overflow-x: hidden;
     }
     body {
       margin: 0;
@@ -102,6 +105,9 @@
     }
     .floating-controls {
       position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
       z-index: 3000;
     }
 
@@ -138,25 +144,29 @@
 
       #games-toggle {
         top: 0.5rem;
-        left: 1rem;
+        left: 0.5rem;
       }
 
       #theme-toggle {
         top: 0.5rem;
-        right: 1rem;
+        right: 0.5rem;
       }
 
       #sound-toggle {
         top: 0.5rem;
-        right: 1rem;
+        right: 3.5rem;
       }
 
       #achievements-toggle {
         top: 0.5rem;
-        left: 4rem;
+        left: 3.5rem;
       }
 
-      /* Theme selector positioning is now handled by themes.js */
+      /* Theme selector responsive override */
+      .theme-switcher {
+        top: 3.5rem !important;
+        right: 0.5rem !important;
+      }
 
       .theme-btn {
         width: 44px;
@@ -496,7 +506,7 @@
       width: 100%;
       height: 100%;
       background-color: rgba(0, 0, 0, 0.8);
-      display: flex;
+      display: none;
       align-items: center;
       justify-content: center;
     }
@@ -588,6 +598,13 @@
       .rule-number {
         font-size: 0.9rem;
       }
+      .share-buttons {
+        flex-wrap: wrap;
+      }
+      .share-btn {
+        flex: 1 1 calc(50% - 0.5rem);
+        min-width: 0;
+      }
     }
 
     @media (max-width: 480px) {
@@ -604,7 +621,8 @@
       .controls {
         flex-direction: column;
       }
-      button {
+      .controls button {
+        flex: none;
         width: 100%;
       }
     }
@@ -712,8 +730,6 @@
         </div>
       </div>
 
-      <!-- Game Container -->
-      <div id='game-container' style='display: none; margin-top: 2rem;'></div>
     </section>
 
 

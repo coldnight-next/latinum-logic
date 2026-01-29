@@ -405,26 +405,31 @@ class EnhancedRevealSystem {
     const overlay = this.createRevealOverlay();
     document.body.appendChild(overlay);
 
+    // Allow click-to-skip so users don't get stuck waiting
+    let skipped = false;
+    const skipHandler = () => { skipped = true; };
+    overlay.addEventListener('click', skipHandler);
+    overlay.style.cursor = 'pointer';
+
     try {
       // Phase 1: Anticipation
-      await this.phaseAnticipation(overlay, rule);
+      if (!skipped) await this.phaseAnticipation(overlay, rule);
 
       // Phase 2: Dramatic Reveal
-      await this.phaseReveal(overlay, rule);
+      if (!skipped) await this.phaseReveal(overlay, rule);
 
       // Phase 3: Celebration
-      await this.phaseCelebration(overlay, rule);
+      if (!skipped) await this.phaseCelebration(overlay, rule);
 
       // Transfer to target element
       this.transferToTarget(overlay, targetElement, rule);
 
     } finally {
-      // Cleanup
-      setTimeout(() => {
-        if (overlay.parentNode) {
-          overlay.parentNode.removeChild(overlay);
-        }
-      }, 500);
+      // Cleanup immediately
+      overlay.removeEventListener('click', skipHandler);
+      if (overlay.parentNode) {
+        overlay.parentNode.removeChild(overlay);
+      }
     }
   }
 
@@ -520,9 +525,11 @@ class EnhancedRevealSystem {
 
     // Add glow effect
     const ruleCard = overlay.querySelector('.reveal-explosion');
-    const glow = document.createElement('div');
-    glow.className = 'reveal-glow';
-    ruleCard.appendChild(glow);
+    if (ruleCard) {
+      const glow = document.createElement('div');
+      glow.className = 'reveal-glow';
+      ruleCard.appendChild(glow);
+    }
 
     // Play celebration sound
     if (this.revealPreferences.soundEnabled) {
@@ -533,30 +540,35 @@ class EnhancedRevealSystem {
   }
 
   transferToTarget(overlay, targetElement, rule) {
-    // Copy the revealed content to the target element
-    const ruleCard = overlay.querySelector('.rule-card-back');
-    if (ruleCard && targetElement) {
-      targetElement.innerHTML = ruleCard.innerHTML;
-      targetElement.classList.add('rule-revealed');
-    } else if (targetElement) {
-      // Fallback: use basic reveal if transfer fails
-      console.warn('Rule card not found in overlay, using basic reveal');
-      this.basicReveal(rule, targetElement);
-    } else {
+    if (!targetElement) {
       console.error('Target element not found for rule reveal');
+      return;
     }
-  }
-
-  basicReveal(rule, targetElement) {
-    // Simple reveal for minimal mode
-    targetElement.innerHTML = `
-      <p class="rule-number">Rule of Acquisition #${rule.number}</p>
-      <p class="rule-text">${rule.text}</p>
-    `;
+    // Update only the rule number and text, preserving other panel elements
+    this.updateRuleDisplay(targetElement, rule);
     targetElement.classList.add('rule-revealed');
   }
 
+  basicReveal(rule, targetElement) {
+    if (!targetElement) return;
+    this.updateRuleDisplay(targetElement, rule);
+    targetElement.classList.add('rule-revealed');
+  }
+
+  updateRuleDisplay(targetElement, rule) {
+    const ruleNumberEl = targetElement.querySelector('#rule-number') || targetElement.querySelector('.rule-number');
+    const ruleTextEl = targetElement.querySelector('#rule-text') || targetElement.querySelector('.rule-text');
+
+    if (ruleNumberEl) {
+      ruleNumberEl.textContent = `Rule of Acquisition #${rule.number}`;
+    }
+    if (ruleTextEl) {
+      ruleTextEl.textContent = rule.text;
+    }
+  }
+
   createMysticalParticles(container) {
+    if (!container) return;
     for (let i = 0; i < 12; i++) {
       const particle = document.createElement('div');
       particle.className = 'mystical-particle';
@@ -568,6 +580,7 @@ class EnhancedRevealSystem {
   }
 
   createExplosionParticles(container, category) {
+    if (!container) return;
     for (let i = 0; i < 20; i++) {
       const particle = document.createElement('div');
       particle.className = `explosion-particle ${this.getParticleColor(category)}`;
@@ -581,6 +594,7 @@ class EnhancedRevealSystem {
   }
 
   createConfetti(container) {
+    if (!container) return;
     for (let i = 0; i < 30; i++) {
       const confetti = document.createElement('div');
       confetti.className = `confetti-piece ${this.getConfettiColor()}`;
