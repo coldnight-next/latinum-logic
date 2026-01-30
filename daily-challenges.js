@@ -292,8 +292,14 @@ class DailyChallengeManager {
     return Math.abs(hash);
   }
 
+  getChallengeContent() {
+    const challengeCard = document.querySelector('.daily-challenge-card');
+    return challengeCard ? challengeCard.querySelector('#challenge-content') : document.getElementById('challenge-content');
+  }
+
   displayChallenge(challenge) {
-    const content = document.getElementById('challenge-content');
+    const content = this.getChallengeContent();
+    if (!content) return;
     content.innerHTML = `
       <div class="challenge-info">
         <h3>${challenge.title}</h3>
@@ -307,13 +313,16 @@ class DailyChallengeManager {
       <button id="start-challenge-btn" class="action-btn">🚀 Start Challenge</button>
     `;
 
-    document.getElementById('start-challenge-btn').addEventListener('click', () => {
-      this.startChallenge(challenge);
-    });
+    const startBtn = content.querySelector('#start-challenge-btn');
+    if (startBtn) {
+      startBtn.addEventListener('click', () => {
+        this.startChallenge(challenge);
+      });
+    }
   }
 
   startChallenge(challenge) {
-    const content = document.getElementById('challenge-content');
+    const content = this.getChallengeContent();
     content.innerHTML = `
       <div class="challenge-quiz">
         <div class="quiz-header">
@@ -334,44 +343,49 @@ class DailyChallengeManager {
   }
 
   showQuestion(question) {
-    document.getElementById('question-display').textContent = question.question;
+    const challengeCard = document.querySelector('.daily-challenge-card');
+    const questionEl = challengeCard ? challengeCard.querySelector('#question-display') : document.getElementById('question-display');
+    const optionsEl = challengeCard ? challengeCard.querySelector('#options-display') : document.getElementById('options-display');
+
+    if (questionEl) questionEl.textContent = question.question;
 
     const optionsHtml = question.options.map((option, index) =>
       `<button class="quiz-option" data-option="${index}">${option}</button>`
     ).join('');
 
-    document.getElementById('options-display').innerHTML = optionsHtml;
-
-    // Add event listeners to options
-    document.querySelectorAll('.quiz-option').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        const selectedIndex = parseInt(e.target.dataset.option);
-        this.answerQuestion(question, selectedIndex);
+    if (optionsEl) {
+      optionsEl.innerHTML = optionsHtml;
+      optionsEl.querySelectorAll('.quiz-option').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const selectedIndex = parseInt(e.target.dataset.option);
+          this.answerQuestion(question, selectedIndex, e.target);
+        });
       });
-    });
+    }
   }
 
-  answerQuestion(question, selectedIndex) {
+  answerQuestion(question, selectedIndex, clickedBtn) {
     const selectedAnswer = question.options[selectedIndex];
-    const isCorrect = selectedAnswer === question.correct ||
-                      (question.correct === question.rule?.number && selectedAnswer === question.correct);
+    const correctValue = String(question.correct);
+    const isCorrect = String(selectedAnswer) === correctValue;
 
     if (isCorrect) {
       this.quizScore += this.currentChallenge.pointsPerQuestion;
-      // Visual feedback
-      event.target.classList.add('correct');
+      clickedBtn.classList.add('correct');
       if (window.themeManager && window.themeManager.isSoundEnabled()) {
         window.themeManager.playSound('rule-reveal');
       }
     } else {
-      event.target.classList.add('incorrect');
+      clickedBtn.classList.add('incorrect');
     }
 
-    // Disable all options
-    document.querySelectorAll('.quiz-option').forEach(btn => {
+    // Disable all options and highlight the correct answer
+    const challengeCard = document.querySelector('.daily-challenge-card');
+    const optionsContainer = challengeCard ? challengeCard.querySelector('#options-display') : document.getElementById('options-display');
+    const allOptions = optionsContainer ? optionsContainer.querySelectorAll('.quiz-option') : document.querySelectorAll('.quiz-option');
+    allOptions.forEach(btn => {
       btn.disabled = true;
-      if (btn.textContent === question.correct ||
-          (question.rule && btn.textContent === question.rule.number)) {
+      if (String(btn.textContent).trim() === correctValue) {
         btn.classList.add('correct');
       }
     });
@@ -387,14 +401,21 @@ class DailyChallengeManager {
     if (this.currentQuestionIndex >= this.currentChallenge.questions.length) {
       this.completeChallenge();
     } else {
-      document.getElementById('current-q').textContent = this.currentQuestionIndex + 1;
+      const challengeCard = document.querySelector('.daily-challenge-card');
+      const counterEl = challengeCard ? challengeCard.querySelector('#current-q') : document.getElementById('current-q');
+      if (counterEl) counterEl.textContent = this.currentQuestionIndex + 1;
       this.showQuestion(this.currentChallenge.questions[this.currentQuestionIndex]);
     }
   }
 
   updateTimer() {
     this.timeLeft--;
-    document.getElementById('quiz-timer').textContent = this.timeLeft;
+    const challengeCard = document.querySelector('.daily-challenge-card');
+    const timerEl = challengeCard ? challengeCard.querySelector('#quiz-timer') : document.getElementById('quiz-timer');
+    if (timerEl) {
+      timerEl.textContent = this.timeLeft;
+      if (this.timeLeft <= 10) timerEl.classList.add('low-time');
+    }
 
     if (this.timeLeft <= 0) {
       this.completeChallenge();
@@ -480,7 +501,8 @@ class DailyChallengeManager {
   }
 
   showCompletionScreen(score, timeBonus) {
-    const content = document.getElementById('challenge-content');
+    const content = this.getChallengeContent();
+    if (!content) return;
     content.innerHTML = `
       <div class="challenge-complete">
         <h3>🎉 Challenge Complete!</h3>
@@ -506,13 +528,17 @@ class DailyChallengeManager {
       </div>
     `;
 
-    document.getElementById('challenge-continue-btn').addEventListener('click', () => {
-      location.reload();
-    });
+    const continueBtn = content.querySelector('#challenge-continue-btn');
+    if (continueBtn) {
+      continueBtn.addEventListener('click', () => {
+        location.reload();
+      });
+    }
   }
 
   showCompletedChallenge() {
-    const content = document.getElementById('challenge-content');
+    const content = this.getChallengeContent();
+    if (!content) return;
     content.innerHTML = `
       <div class="challenge-completed-today">
         <h3>✅ Challenge Completed!</h3>
@@ -539,8 +565,11 @@ class DailyChallengeManager {
       const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
       const seconds = Math.floor((diff % (1000 * 60)) / 1000);
 
-      document.getElementById('countdown').textContent =
-        `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+      const challengeCard = document.querySelector('.daily-challenge-card');
+      const countdownEl = challengeCard ? challengeCard.querySelector('#countdown') : document.getElementById('countdown');
+      if (countdownEl) {
+        countdownEl.textContent = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+      }
 
       if (diff > 0) {
         setTimeout(updateCountdown, 1000);
