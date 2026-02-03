@@ -46,35 +46,35 @@ class FerengiEasterEggs {
     // Add invisible Ferengi ears to the header
     const header = document.querySelector('header') || document.body;
 
-    // Left ear
+    // Left ear - positioned lower to avoid floating controls
     const leftEar = document.createElement('div');
     leftEar.className = 'ferengi-ear left-ear';
     leftEar.innerHTML = '👂';
     leftEar.style.cssText = `
       position: fixed;
-      top: 20px;
-      left: 20px;
-      font-size: 2rem;
+      top: 120px;
+      left: 10px;
+      font-size: 1.5rem;
       cursor: pointer;
-      opacity: 0.1;
+      opacity: 0.08;
       transition: opacity 0.3s ease;
-      z-index: 1000;
+      z-index: 100;
       transform: scaleX(-1);
     `;
 
-    // Right ear
+    // Right ear - positioned lower to avoid floating controls
     const rightEar = document.createElement('div');
     rightEar.className = 'ferengi-ear right-ear';
     rightEar.innerHTML = '👂';
     rightEar.style.cssText = `
       position: fixed;
-      top: 20px;
-      right: 20px;
-      font-size: 2rem;
+      top: 120px;
+      right: 10px;
+      font-size: 1.5rem;
       cursor: pointer;
-      opacity: 0.1;
+      opacity: 0.08;
       transition: opacity 0.3s ease;
-      z-index: 1000;
+      z-index: 100;
     `;
 
     document.body.appendChild(leftEar);
@@ -188,11 +188,12 @@ class FerengiEasterEggs {
 
     // 1% chance to show a quote when revealing a rule
     const originalRandomRule = window.getRandomRule;
-    if (originalRandomRule) {
+    if (typeof originalRandomRule === 'function') {
       window.getRandomRule = () => {
         const result = originalRandomRule();
 
-        if (Math.random() < 0.01) {
+        // Guard against null/undefined result
+        if (result && Math.random() < 0.01) {
           setTimeout(() => {
             this.showQuarkQuote();
           }, 2000);
@@ -479,6 +480,7 @@ class FerengiEasterEggs {
 
   triggerLatinumRain() {
     const coins = ['💰', '🪙', '✨', '💎'];
+    const coinElements = [];
 
     for (let i = 0; i < 20; i++) {
       setTimeout(() => {
@@ -488,9 +490,10 @@ class FerengiEasterEggs {
         coin.style.left = Math.random() * 100 + 'vw';
         coin.style.animationDelay = Math.random() * 2 + 's';
         document.body.appendChild(coin);
+        coinElements.push(coin);
 
         setTimeout(() => {
-          coin.remove();
+          if (coin.parentNode) coin.remove();
         }, 3000);
       }, i * 100);
     }
@@ -498,7 +501,11 @@ class FerengiEasterEggs {
     document.body.classList.add('latinum-rain');
     setTimeout(() => {
       document.body.classList.remove('latinum-rain');
-    }, 3000);
+      // Cleanup any remaining coins
+      coinElements.forEach(coin => {
+        if (coin.parentNode) coin.remove();
+      });
+    }, 4000);
 
     if (window.ferengiSounds) {
       ferengiSounds.playSound('latinum');
@@ -537,7 +544,12 @@ class FerengiEasterEggs {
     if (this.hiddenFeatures.rule287) return;
 
     // Check if user has viewed all 286 rules first
-    const ferengiStats = JSON.parse(localStorage.getItem('ferengiStats') || '{}');
+    let ferengiStats = {};
+    try {
+      ferengiStats = JSON.parse(localStorage.getItem('ferengiStats') || '{}');
+    } catch (e) {
+      console.warn('Failed to load ferengiStats:', e);
+    }
     const rulesViewed = Array.isArray(ferengiStats.rulesViewed) ? ferengiStats.rulesViewed.length : 0;
 
     if (rulesViewed < 286) {
@@ -631,7 +643,12 @@ class FerengiEasterEggs {
 
   // Public method to check for Rule 287 eligibility
   checkRule287Eligibility() {
-    const ferengiStats = JSON.parse(localStorage.getItem('ferengiStats') || '{}');
+    let ferengiStats = {};
+    try {
+      ferengiStats = JSON.parse(localStorage.getItem('ferengiStats') || '{}');
+    } catch (e) {
+      console.warn('Failed to load ferengiStats:', e);
+    }
     const rulesViewed = Array.isArray(ferengiStats.rulesViewed) ? ferengiStats.rulesViewed.length : 0;
 
     if (rulesViewed >= 286 && !this.hiddenFeatures.rule287) {

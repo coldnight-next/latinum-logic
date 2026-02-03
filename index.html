@@ -6,6 +6,11 @@
   <title>Latinum Logic | Ferengi Rule Oracle</title>
   <link rel="manifest" href="manifest.json">
   <link rel="icon" href="favicon.ico" type="image/x-icon">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Latinum Logic">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="theme-color" content="#120b1f">
   <meta name="description" content="Consult the 286 Rules of Acquisition for ultimate Ferengi wisdom. Ancient profit principles perfect for modern business and crypto traders.">
   <meta name="keywords" content="Ferengi, Star Trek, Rules of Acquisition, business wisdom, profit, Latinum, crypto trading, entrepreneurship">
 
@@ -752,7 +757,7 @@
 
   </main>
   <footer>
-    <p>&copy; 2024 Ferengi Commerce Authority. All Rights Reserved. | <a href="#" id="easter-egg">About the Ferengi</a></p>
+    <p>&copy; 2024-<script>document.write(new Date().getFullYear())</script> Ferengi Commerce Authority. All Rights Reserved. | <a href="#" id="easter-egg">About the Ferengi</a></p>
     <div id="easter-egg-content" style="display: none; text-align: center; margin-top: 1rem; color: var(--latinum);">
       <p>🤑 The Ferengi are a fictional extraterrestrial species in the Star Trek universe, known for their love of profit and business acumen. Their Rules of Acquisition guide their every transaction!</p>
       <p>💡 Fun fact: "Ferengi" is derived from the Persian word for "Frank," referencing medieval European merchants.</p>
@@ -1789,7 +1794,8 @@
     // Register Service Worker for offline support
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', function() {
-        navigator.serviceWorker.register('/sw.js').catch(function() {
+        // Use relative path for subdirectory compatibility
+        navigator.serviceWorker.register('./sw.js').catch(function() {
           // SW registration failed silently (expected on file:// protocol)
         });
       });

@@ -355,15 +355,23 @@ class FerengiVisualEffects {
 
   addParticleSystem() {
     // Reuse existing particle canvas if it exists (from particles.js)
-    let canvas = document.getElementById('particle-canvas');
-    if (canvas) {
-      // Canvas already exists from particles.js, skip creating duplicate
-      return;
-    }
+    // Use a small delay to ensure particles.js has had a chance to initialize
+    setTimeout(() => {
+      let canvas = document.getElementById('particle-canvas');
+      if (canvas) {
+        // Canvas already exists from particles.js, skip creating duplicate
+        return;
+      }
 
-    // Create particle canvas only if one doesn't already exist
-    canvas = document.createElement('canvas');
-    canvas.id = 'particle-canvas';
+      // Double-check after delay - particles.js should have created it by now
+      canvas = document.getElementById('particle-canvas');
+      if (canvas) {
+        return;
+      }
+
+      // Create particle canvas only if one doesn't already exist
+      canvas = document.createElement('canvas');
+      canvas.id = 'enhanced-particle-canvas'; // Use different ID to avoid conflicts
     canvas.style.cssText = `
       position: fixed;
       top: 0;
@@ -406,11 +414,12 @@ class FerengiVisualEffects {
 
     animate();
 
-    // Resize handler
-    window.addEventListener('resize', () => {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-    });
+      // Resize handler
+      window.addEventListener('resize', () => {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+      });
+    }, 100); // Small delay to let particles.js initialize first
   }
 
   createParticle(canvas) {
@@ -554,7 +563,20 @@ class FerengiVisualEffects {
     });
   }
 
+  cleanup() {
+    // Clean up intervals to prevent memory leaks
+    if (this.glitchInterval) {
+      clearInterval(this.glitchInterval);
+      this.glitchInterval = null;
+    }
+  }
+
   addTextGlitchEffects() {
+    // Clean up any existing interval first
+    if (this.glitchInterval) {
+      clearInterval(this.glitchInterval);
+    }
+    
     // Randomly add glitch effects to text
     this.glitchInterval = setInterval(() => {
       const textElements = document.querySelectorAll('.rule-text, h1, h2');
@@ -628,6 +650,13 @@ const visualEffects = new FerengiVisualEffects();
 
 // Make it globally accessible
 window.visualEffects = visualEffects;
+
+// Cleanup on page unload to prevent memory leaks
+window.addEventListener('beforeunload', () => {
+  if (visualEffects && visualEffects.cleanup) {
+    visualEffects.cleanup();
+  }
+});
 
 // Bind to theme changes for extra effects
 document.addEventListener('DOMContentLoaded', () => {

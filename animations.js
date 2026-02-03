@@ -123,3 +123,10 @@ const animationController = new AnimationController();
 
 // Export for global use
 window.animationController = animationController;
+
+// Cleanup on page unload to prevent memory leaks
+window.addEventListener('beforeunload', () => {
+  if (animationController && animationController.shipFlybyInterval) {
+    clearInterval(animationController.shipFlybyInterval);
+  }
+});

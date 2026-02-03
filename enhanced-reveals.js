@@ -88,6 +88,14 @@ class EnhancedRevealSystem {
       }
     });
 
+    // Close panel with Escape key
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && settingsPanel.style.display !== 'none') {
+        settingsPanel.style.display = 'none';
+        settingsBtn.focus();
+      }
+    });
+
     // Bind setting changes
     document.getElementById('reveal-intensity').addEventListener('change', (e) => {
       this.revealPreferences.intensity = e.target.value;
@@ -327,6 +335,26 @@ class EnhancedRevealSystem {
       @keyframes revealGlowPulse {
         0%, 100% { opacity: 0.3; transform: scale(1); }
         50% { opacity: 0.6; transform: scale(1.1); }
+      }
+
+      .reveal-preferences {
+        position: absolute;
+        top: 1rem;
+        right: 6rem;
+        z-index: 3000;
+      }
+
+      @media (max-width: 768px) {
+        .reveal-preferences {
+          top: 3.5rem;
+          right: 4rem;
+        }
+        
+        .reveal-preferences .theme-btn {
+          width: 40px;
+          height: 40px;
+          font-size: 0.9rem;
+        }
       }
 
       .reveal-settings-panel {
