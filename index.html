@@ -14,14 +14,14 @@
   <meta property="og:url" content="https://latinum-logic.netlify.app/">
   <meta property="og:title" content="Latinum Logic | Ferengi Rule Oracle">
   <meta property="og:description" content="Consult the 286 Rules of Acquisition for ultimate Ferengi wisdom. Ancient profit principles perfect for modern business and crypto traders.">
-  <meta property="og:image" content="https://latinum-logic.netlify.app/preview-image.jpg">
+  <meta property="og:image" content="https://latinum-logic.netlify.app/icon-512.png">
 
   <!-- Twitter -->
-  <meta property="twitter:card" content="summary_large_image">
-  <meta property="twitter:url" content="https://latinum-logic.netlify.app/">
-  <meta property="twitter:title" content="Latinum Logic | Ferengi Rule Oracle">
-  <meta property="twitter:description" content="Consult the 286 Rules of Acquisition for ultimate Ferengi wisdom. Ancient profit principles perfect for modern business and crypto traders.">
-  <meta property="twitter:image" content="https://latinum-logic.netlify.app/preview-image.jpg">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:url" content="https://latinum-logic.netlify.app/">
+  <meta name="twitter:title" content="Latinum Logic | Ferengi Rule Oracle">
+  <meta name="twitter:description" content="Consult the 286 Rules of Acquisition for ultimate Ferengi wisdom. Ancient profit principles perfect for modern business and crypto traders.">
+  <meta name="twitter:image" content="https://latinum-logic.netlify.app/icon-512.png">
 
   <link rel='preconnect' href='https://fonts.googleapis.com'>
   <link rel='preconnect' href='https://fonts.gstatic.com' crossorigin>
@@ -139,7 +139,7 @@
 
     @media (max-width: 768px) {
       .masthead {
-        padding-top: 5rem;
+        padding-top: 6rem;
       }
 
       #games-toggle {
@@ -147,9 +147,9 @@
         left: 0.5rem;
       }
 
-      #theme-toggle {
+      #achievements-toggle {
         top: 0.5rem;
-        right: 0.5rem;
+        left: 3.5rem;
       }
 
       #sound-toggle {
@@ -157,21 +157,27 @@
         right: 3.5rem;
       }
 
-      #achievements-toggle {
+      #theme-toggle {
         top: 0.5rem;
-        left: 3.5rem;
+        right: 0.5rem;
       }
 
       /* Theme selector responsive override */
       .theme-switcher {
         top: 3.5rem !important;
         right: 0.5rem !important;
+        max-width: 120px;
+      }
+
+      .theme-switcher .theme-select {
+        font-size: 0.75rem;
+        padding: 0.4rem;
       }
 
       .theme-btn {
-        width: 44px;
-        height: 44px;
-        font-size: 1rem;
+        width: 40px;
+        height: 40px;
+        font-size: 0.9rem;
       }
     }
     .theme-btn {
@@ -375,6 +381,29 @@
       display: flex;
       flex-wrap: wrap;
       gap: 0.5rem;
+      justify-content: center;
+    }
+    .char-counter {
+      text-align: right;
+      font-size: 0.8rem;
+      color: rgba(255, 231, 149, 0.6);
+      margin-top: 0.25rem;
+    }
+    .char-counter.warning {
+      color: #f39c12;
+    }
+    .char-counter.error {
+      color: #e74c3c;
+    }
+    .char-counter.valid {
+      color: #2ecc71;
+    }
+    #no-results-message {
+      text-align: center;
+      padding: 2rem;
+      color: rgba(255, 231, 149, 0.7);
+      font-style: italic;
+      display: none;
     }
     .category-btn {
       padding: 0.5rem 0.75rem;
@@ -633,9 +662,9 @@
   <div class='starfield'></div>
   <header class='masthead'>
     <div class='floating-controls'>
-      <button id='games-toggle' class='theme-btn' aria-label='Play Ferengi Games' onclick="toggleGamesSection()">🎮</button>
-      <button id='sound-toggle' class='theme-btn' aria-label='Toggle Sound Effects'>🔊</button>
-      <button id='achievements-toggle' class='theme-btn' aria-label='View Achievements'>🏆</button>
+      <button id='games-toggle' class='theme-btn' aria-label='Play Ferengi Games' title='Play mini-games' onclick="toggleGamesSection()">🎮</button>
+      <button id='sound-toggle' class='theme-btn' aria-label='Toggle Sound Effects' title='Sound Effects: On'>🔊</button>
+      <button id='achievements-toggle' class='theme-btn' aria-label='View Achievements' title='View your achievements'>🏆</button>
     </div>
     <h1>Latinum Logic</h1>
     <p class='tagline'>Submit your scheme. Receive Ferengi-sanctioned wisdom.</p>
@@ -662,11 +691,13 @@
       <form id='advice-form'>
         <label for='question'>What profit dilemma plagues you?</label>
         <textarea id='question' placeholder='Describe your situation, entrepreneur. The lobes are listening...' aria-label='Question for Ferengi advice' maxlength='500'></textarea>
+        <div class='char-counter'><span id='char-count'>0</span>/500 characters (min 10)</div>
         <div id='form-feedback' class='form-feedback' style='display: none;'></div>
         <div class='controls'>
           <button type='submit' id='submit-button'>Consult the Rules</button>
           <button type='button' class='secondary' id='random-button'>Deal Me a Random Rule</button>
         </div>
+        <div id='no-results-message'></div>
       </form>
 
     </section>
@@ -1077,19 +1108,22 @@
     window.rules = rules;
     window.ferengiRules = rules;
 
-    // Function to assign categories to rules
+    // Function to assign categories to rules (only if not already set)
     function assignCategories() {
       rules.forEach(rule => {
+        // Skip if category already set from initial data
+        if (rule.category) return;
+        
         const text = rule.text.toLowerCase();
-        if (text.includes('profit') || text.includes('latinum') || text.includes('money') || text.includes('finance') || text.includes('rich') || text.includes('wealth') || text.includes('buy') || text.includes('sell') || text.includes('pay')) {
+        if (text.includes('profit') || text.includes('latinum') || text.includes('money') || text.includes('finance') || text.includes('rich') || text.includes('wealth') || text.includes('buy') || text.includes('sell') || text.includes('pay') || text.includes('cost') || text.includes('price') || text.includes('earn') || text.includes('spend') || text.includes('coin') || text.includes('gold')) {
           rule.category = 'profit';
-        } else if (text.includes('business') || text.includes('customer') || text.includes('sale') || text.includes('advertising') || text.includes('user') || text.includes('vendor') || text.includes('inventory') || text.includes('war') || text.includes('peace')) {
+        } else if (text.includes('business') || text.includes('customer') || text.includes('sale') || text.includes('advertising') || text.includes('user') || text.includes('vendor') || text.includes('inventory') || text.includes('war') || text.includes('peace') || text.includes('shop') || text.includes('trade') || text.includes('employ') || text.includes('boss') || text.includes('work')) {
           rule.category = 'business';
-        } else if (text.includes('deal') || text.includes('contract') || text.includes('negotiat') || text.includes('bargain') || text.includes('bid') || text.includes('offer') || text.includes('bluff') || text.includes('klingon')) {
+        } else if (text.includes('deal') || text.includes('contract') || text.includes('negotiat') || text.includes('bargain') || text.includes('bid') || text.includes('offer') || text.includes('bluff') || text.includes('klingon') || text.includes('agree') || text.includes('promise')) {
           rule.category = 'negotiation';
-        } else if (text.includes('lie') || text.includes('cheat') || text.includes('morality') || text.includes('honest') || text.includes('trust') || text.includes('revenge') || text.includes('conscience')) {
+        } else if (text.includes('lie') || text.includes('cheat') || text.includes('morality') || text.includes('honest') || text.includes('trust') || text.includes('revenge') || text.includes('conscience') || text.includes('steal') || text.includes('truth') || text.includes('secret') || text.includes('blame')) {
           rule.category = 'ethics';
-        } else if (text.includes('family') || text.includes('mother') || text.includes('wife') || text.includes('woman') || text.includes('sex') || text.includes('lust') || text.includes('oo-mox') || text.includes('ear') || text.includes('lobes')) {
+        } else if (text.includes('family') || text.includes('mother') || text.includes('wife') || text.includes('woman') || text.includes('sex') || text.includes('lust') || text.includes('oo-mox') || text.includes('ear') || text.includes('lobes') || text.includes('female') || text.includes('brother') || text.includes('friend') || text.includes('relative') || text.includes('love') || text.includes('heart')) {
           rule.category = 'personal';
         } else {
           rule.category = 'wisdom';
@@ -1249,25 +1283,64 @@
         dashboardManager.trackRuleView(rule.number);
       }
 
-      // Add to history
+      // Add to history (limit to 5 entries to prevent memory bloat)
       const historyList = document.getElementById('history-list');
-      const li = document.createElement('li');
-      li.textContent = `Rule ${rule.number}: ${rule.text}`;
-      historyList.appendChild(li);
-      // Scroll to top of history if too long
-      if (historyList.children.length > 5) {
-        historyList.removeChild(historyList.firstChild);
+      if (historyList) {
+        const li = document.createElement('li');
+        li.textContent = `Rule ${rule.number}: ${rule.text}`;
+        
+        // Insert at the top instead of bottom for most recent first
+        historyList.insertBefore(li, historyList.firstChild);
+        
+        // Keep only the last 5 entries
+        while (historyList.children.length > 5) {
+          historyList.removeChild(historyList.lastChild);
+        }
       }
     }
 
     // Theme functionality is now handled by themes.js for proper persistence
+
+    // Character counter for textarea
+    const questionInput = document.getElementById('question');
+    const charCount = document.getElementById('char-count');
+    const charCounter = document.querySelector('.char-counter');
+    
+    questionInput.addEventListener('input', function() {
+      const len = this.value.length;
+      charCount.textContent = len;
+      charCounter.classList.remove('warning', 'error', 'valid');
+      if (len === 0) {
+        // neutral
+      } else if (len < 10) {
+        charCounter.classList.add('error');
+      } else if (len > 450) {
+        charCounter.classList.add('warning');
+      } else {
+        charCounter.classList.add('valid');
+      }
+    });
 
     // Search functionality
     const searchInput = document.getElementById('search-input');
     searchInput.addEventListener('input', function() {
       searchQuery = this.value.trim();
       updateActiveCategory();
+      updateSearchResults();
     });
+    
+    function updateSearchResults() {
+      const filtered = getFilteredRules();
+      const noResultsEl = document.getElementById('no-results-message');
+      if (noResultsEl) {
+        if (filtered.length === 0 && searchQuery !== '') {
+          noResultsEl.style.display = 'block';
+          noResultsEl.textContent = `No rules found matching "${searchQuery}". Try different keywords!`;
+        } else {
+          noResultsEl.style.display = 'none';
+        }
+      }
+    }
 
     // Category filter functionality
     const categoryButtons = document.querySelectorAll('.category-btn');
@@ -1631,11 +1704,38 @@
           try {
             const shareWindow = window.open(shareUrl, '_blank', 'width=600,height=400');
             if (!shareWindow) {
-              alert('Please allow popups for this site to share content.');
+              // Fallback: copy to clipboard and show message
+              const shareText = `${baseText}\n\n${window.location.href}`;
+              if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(shareText).then(() => {
+                  if (window.showToast) {
+                    window.showToast('Link copied! Popup blocked - paste to share manually.', 4000);
+                  } else {
+                    alert('Link copied to clipboard! Popup was blocked - paste to share manually.');
+                  }
+                }).catch(() => {
+                  if (window.showToast) {
+                    window.showToast('Please allow popups or copy the link manually.', 4000);
+                  } else {
+                    alert('Please allow popups for this site to share content.');
+                  }
+                });
+              } else {
+                if (window.showToast) {
+                  window.showToast('Please allow popups to share content.', 4000);
+                } else {
+                  alert('Please allow popups for this site to share content.');
+                }
+              }
               return;
             }
           } catch (e) {
-            alert('Sharing failed. Please try again.');
+            console.error('Share failed:', e);
+            if (window.showToast) {
+              window.showToast('Sharing failed. Please try again.', 3000);
+            } else {
+              alert('Sharing failed. Please try again.');
+            }
             return;
           }
 

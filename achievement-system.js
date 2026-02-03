@@ -194,6 +194,49 @@ class FerengiAchievementSystem {
     this.createCelebrationOverlay();
     this.bindEvents();
     this.startProgressWatcher();
+    this.checkFirstVisitOnboarding();
+  }
+
+  checkFirstVisitOnboarding() {
+    // Show onboarding hint if first visit
+    const hasSeenOnboarding = localStorage.getItem('achievementOnboardingSeen');
+    if (!hasSeenOnboarding) {
+      setTimeout(() => {
+        const achievementBtn = document.getElementById('achievements-toggle');
+        if (achievementBtn) {
+          // Add pulse animation
+          achievementBtn.classList.add('onboarding-pulse');
+          
+          // Show tooltip
+          const tooltip = document.createElement('div');
+          tooltip.className = 'onboarding-tooltip';
+          tooltip.innerHTML = '🏆 Unlock achievements by exploring!';
+          tooltip.style.cssText = `
+            position: absolute;
+            bottom: -40px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.9);
+            color: var(--latinum);
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            white-space: nowrap;
+            z-index: 1000;
+            animation: fadeIn 0.5s ease;
+          `;
+          achievementBtn.style.position = 'relative';
+          achievementBtn.appendChild(tooltip);
+          
+          // Remove after 5 seconds
+          setTimeout(() => {
+            achievementBtn.classList.remove('onboarding-pulse');
+            if (tooltip.parentNode) tooltip.remove();
+            localStorage.setItem('achievementOnboardingSeen', 'true');
+          }, 5000);
+        }
+      }, 2000);
+    }
   }
 
   createAchievementUI() {

@@ -30,9 +30,14 @@ class GameManager {
   }
 
   createGamesUI() {
-    // Check if games section already exists
-    if (document.querySelector('.games-section')) {
+    // Check if games section already exists - be thorough
+    const existingSections = document.querySelectorAll('.games-section');
+    if (existingSections.length > 0) {
       console.log('Games section already exists, not creating duplicate');
+      // Clean up any duplicates beyond the first
+      existingSections.forEach((section, index) => {
+        if (index > 0) section.remove();
+      });
       return;
     }
 
@@ -151,11 +156,26 @@ class GameManager {
     // Find existing games section
     let gamesSection = document.querySelector('.games-section');
 
-    // If no section exists, create one
+    // If no section exists, show loading and create one
     if (!gamesSection) {
       console.log('No games section found, creating new one...');
+      
+      // Show temporary loading state
+      const main = document.querySelector('main') || document.querySelector('.council');
+      if (main) {
+        const loadingDiv = document.createElement('div');
+        loadingDiv.id = 'games-loading-temp';
+        loadingDiv.className = 'panel games-loading';
+        loadingDiv.innerHTML = '<div class="spinner"></div><p>Loading games...</p>';
+        main.appendChild(loadingDiv);
+      }
+      
       this.createGamesUI();
       gamesSection = document.querySelector('.games-section');
+      
+      // Remove loading state
+      const loadingTemp = document.getElementById('games-loading-temp');
+      if (loadingTemp) loadingTemp.remove();
     }
 
     // Show the first games section only (in case there are duplicates)
@@ -169,8 +189,8 @@ class GameManager {
         if (index === 0) {
           section.style.display = 'block';
         } else {
-          console.log('Hiding duplicate games section');
-          section.style.display = 'none';
+          console.log('Removing duplicate games section');
+          section.remove();
         }
       });
 
@@ -221,7 +241,13 @@ class GameManager {
     }
   }
 
-  endGame() {
+  endGame(force = false) {
+    // Confirm if game is in progress and not forced
+    if (this.currentGame && !force) {
+      const confirmed = confirm('Are you sure you want to leave? Your game progress will be lost.');
+      if (!confirmed) return;
+    }
+    
     const gamesSection = document.querySelector('.games-section');
     const gameContainer = gamesSection ? gamesSection.querySelector('#game-container') : document.getElementById('game-container');
 
@@ -233,8 +259,10 @@ class GameManager {
         }
       });
     }
-    gameContainer.style.display = 'none';
-    gameContainer.innerHTML = '';
+    if (gameContainer) {
+      gameContainer.style.display = 'none';
+      gameContainer.innerHTML = '';
+    }
     this.currentGame = null;
   }
 
@@ -523,7 +551,7 @@ class RuleMatchingGame {
         </div>
         <div class="game-controls">
           <button onclick="gameManager.startGame('matching')" class="action-btn">🔄 Play Again</button>
-          <button onclick="gameManager.endGame()" class="action-btn secondary">🏠 Back to Games</button>
+          <button onclick="gameManager.endGame(true)" class="action-btn secondary">🏠 Back to Games</button>
         </div>
       </div>
     `;
@@ -773,7 +801,14 @@ class RuleTriviaGame {
     const rulesData = window.rules || window.ferengiRules || [];
     if (rulesData.length === 0) {
       console.error('No rules data found for trivia game');
-      return [];
+      // Return fallback questions
+      return [{
+        type: 'identify',
+        question: 'Which rule says: "Once you have their money, never give it back"?',
+        options: [1, 3, 7, 15],
+        correct: 1,
+        rule: { number: 1, text: "Once you have their money, never give it back", category: 'profit' }
+      }];
     }
 
     // Question type 1: Which rule says X?
@@ -1076,7 +1111,7 @@ class RuleTriviaGame {
 
         <div class="game-controls">
           <button onclick="gameManager.startGame('trivia')" class="action-btn">🔄 Play Again</button>
-          <button onclick="gameManager.endGame()" class="action-btn secondary">🏠 Back to Games</button>
+          <button onclick="gameManager.endGame(true)" class="action-btn secondary">🏠 Back to Games</button>
         </div>
       </div>
     `;
@@ -1098,6 +1133,7 @@ class MemoryChallengeGame {
     this.timeLeft = 180; // 3 minutes
     this.timer = null;
     this.gameStarted = false;
+    this.isProcessing = false; // Lock to prevent race conditions
     this.initializeGame();
   }
 
@@ -1229,10 +1265,10 @@ class MemoryChallengeGame {
   }
 
   flipCard(index) {
-    if (!this.gameStarted || this.flippedCards.length >= 2) return;
+    if (!this.gameStarted || this.flippedCards.length >= 2 || this.isProcessing) return;
 
     const card = document.querySelector(`[data-index="${index}"]`);
-    if (card.classList.contains('flipped') || card.classList.contains('matched')) return;
+    if (!card || card.classList.contains('flipped') || card.classList.contains('matched')) return;
 
     card.classList.add('flipped');
     this.flippedCards.push(index);
@@ -1244,6 +1280,7 @@ class MemoryChallengeGame {
 
     if (this.flippedCards.length === 2) {
       this.moves++;
+      this.isProcessing = true; // Lock during match check
       this.checkMatch();
     }
 
@@ -1282,6 +1319,7 @@ class MemoryChallengeGame {
       }
 
       this.flippedCards = [];
+      this.isProcessing = false; // Unlock after processing
       this.updateUI();
     }, 1000);
   }
@@ -1371,7 +1409,7 @@ class MemoryChallengeGame {
 
         <div class="game-controls">
           <button onclick="gameManager.startGame('memory')" class="action-btn">🔄 Play Again</button>
-          <button onclick="gameManager.endGame()" class="action-btn secondary">🏠 Back to Games</button>
+          <button onclick="gameManager.endGame(true)" class="action-btn secondary">🏠 Back to Games</button>
         </div>
       </div>
     `;

@@ -940,11 +940,14 @@
 }
 
 .question-text {
-  font-size: 1.3rem;
+  font-size: 1.2rem;
   color: var(--latinum-bright);
   margin-bottom: 1rem;
-  line-height: 1.6;
+  line-height: 1.5;
   font-weight: 600;
+  max-height: 150px;
+  overflow-y: auto;
+  word-wrap: break-word;
 }
 
 .question-category {
@@ -1095,12 +1098,26 @@
   }
 
   .question-text {
-    font-size: 1.1rem;
+    font-size: 1rem;
+    max-height: 120px;
   }
 
   .option-btn {
     padding: 0.75rem;
     font-size: 0.9rem;
+  }
+
+  /* Fix share buttons on mobile */
+  .share-buttons {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+  }
+
+  .share-btn {
+    font-size: 0.7rem;
+    padding: 0.5rem 0.25rem;
+    text-align: center;
   }
 }
 
@@ -1215,13 +1232,70 @@
 }
 
 .card-text {
-  font-size: 0.6rem;
-  line-height: 1.1;
+  font-size: 0.55rem;
+  line-height: 1.15;
   word-wrap: break-word;
   overflow: hidden;
   display: -webkit-box;
-  -webkit-line-clamp: 4;
+  -webkit-line-clamp: 5;
   -webkit-box-orient: vertical;
+  padding: 0.2rem;
+  text-overflow: ellipsis;
+}
+
+/* Tooltip for sound toggle */
+.theme-btn[title]:hover::after {
+  content: attr(title);
+  position: absolute;
+  bottom: -30px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.9);
+  color: var(--latinum);
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  white-space: nowrap;
+  z-index: 1000;
+}
+
+/* Quote canvas responsive preview */
+#quote-canvas {
+  max-width: 100%;
+  height: auto;
+  max-height: 70vh;
+}
+
+/* Games loading state */
+.games-loading {
+  text-align: center;
+  padding: 2rem;
+  color: var(--latinum);
+}
+
+.games-loading .spinner {
+  margin: 1rem auto;
+}
+
+/* Achievement onboarding pulse */
+.onboarding-pulse {
+  animation: onboardingPulse 1s ease-in-out infinite;
+}
+
+@keyframes onboardingPulse {
+  0%, 100% { 
+    box-shadow: 0 0 5px rgba(249, 217, 108, 0.5);
+    transform: scale(1);
+  }
+  50% { 
+    box-shadow: 0 0 20px rgba(249, 217, 108, 0.9), 0 0 30px rgba(249, 217, 108, 0.5);
+    transform: scale(1.1);
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateX(-50%) translateY(10px); }
+  to { opacity: 1; transform: translateX(-50%) translateY(0); }
 }
 
 .memory-instructions {

@@ -141,14 +141,17 @@ class ThemeManager {
 
   updateSoundButton() {
     const btn = document.getElementById('sound-toggle');
+    if (!btn) return;
     if (this.soundEnabled) {
       btn.textContent = '🔊';
       btn.classList.remove('muted');
-      btn.title = 'Sound Effects: On';
+      btn.title = 'Sound Effects: On (click to mute)';
+      btn.setAttribute('aria-label', 'Sound is on, click to mute');
     } else {
       btn.textContent = '🔇';
       btn.classList.add('muted');
-      btn.title = 'Sound Effects: Off';
+      btn.title = 'Sound Effects: Off (click to unmute)';
+      btn.setAttribute('aria-label', 'Sound is off, click to unmute');
     }
   }
 

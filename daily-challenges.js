@@ -305,10 +305,13 @@ class DailyChallengeManager {
         <h3>${challenge.title}</h3>
         <p>${challenge.description}</p>
         <div class="challenge-meta">
-          <span>${challenge.questions.length} questions</span>
-          <span>${challenge.timeLimit}s time limit</span>
-          <span>${challenge.pointsPerQuestion * challenge.questions.length} max points</span>
+          <span>📝 ${challenge.questions.length} questions</span>
+          <span>⏱️ ${challenge.timeLimit}s time limit</span>
+          <span>🏆 ${challenge.pointsPerQuestion * challenge.questions.length} max points</span>
         </div>
+        <p class="timezone-info" style="font-size: 0.75rem; color: rgba(255, 231, 149, 0.5); margin-top: 0.5rem;">
+          Challenge resets daily at midnight (${Intl.DateTimeFormat().resolvedOptions().timeZone})
+        </p>
       </div>
       <button id="start-challenge-btn" class="action-btn">🚀 Start Challenge</button>
     `;
@@ -546,6 +549,9 @@ class DailyChallengeManager {
         <p>Come back tomorrow for a new challenge!</p>
         <div class="next-challenge">
           <p>Next challenge available in: <span id="countdown">calculating...</span></p>
+          <p class="timezone-info" style="font-size: 0.8rem; color: rgba(255, 231, 149, 0.6); margin-top: 0.5rem;">
+            (Resets at midnight in your local timezone: ${Intl.DateTimeFormat().resolvedOptions().timeZone})
+          </p>
         </div>
       </div>
     `;
