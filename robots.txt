@@ -1,0 +1,11 @@
+# Robots.txt for Latinum Logic - Ferengi Rule Oracle
+# https://latinum-logic.netlify.app/
+
+User-agent: *
+Allow: /
+
+# Sitemap location
+Sitemap: https://latinum-logic.netlify.app/sitemap.xml
+
+# Crawl-delay (be nice to search engines)
+Crawl-delay: 1

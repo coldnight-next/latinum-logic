@@ -1,21 +1,47 @@
 {
-  "name": "Latinum Logic | Ferengi Rule Oracle",
-  "short_name": "Ferengi Oracle",
-  "description": "Consult the 286 Rules of Acquisition for ultimate Ferengi wisdom",
-  "start_url": "/",
+  "name": "Latinum Logic - Ferengi Rules of Acquisition Oracle",
+  "short_name": "Latinum Logic",
+  "description": "Discover all 286 Ferengi Rules of Acquisition! Get business wisdom, play mini-games, earn achievements, and master the art of profit from Star Trek's ultimate entrepreneurs.",
+  "start_url": "./",
+  "scope": "./",
   "display": "standalone",
+  "orientation": "portrait-primary",
   "background_color": "#0b090e",
   "theme_color": "#f9d96c",
+  "categories": ["entertainment", "games", "education"],
+  "lang": "en",
+  "dir": "ltr",
   "icons": [
     {
       "src": "icon-192.png",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     },
     {
       "src": "icon-512.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     }
-  ]
+  ],
+  "screenshots": [],
+  "shortcuts": [
+    {
+      "name": "Random Rule",
+      "short_name": "Random",
+      "description": "Get a random Rule of Acquisition",
+      "url": "./?action=random",
+      "icons": [{ "src": "icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Play Games",
+      "short_name": "Games",
+      "description": "Play Ferengi mini-games",
+      "url": "./?action=games",
+      "icons": [{ "src": "icon-192.png", "sizes": "192x192" }]
+    }
+  ],
+  "related_applications": [],
+  "prefer_related_applications": false
 }

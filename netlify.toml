@@ -1,0 +1,39 @@
+# Netlify configuration for Latinum Logic
+
+[build]
+  publish = "."
+
+# Redirects for SPA (if needed in future)
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+  conditions = {Role = ["admin"]}
+
+# Pretty URLs
+[[redirects]]
+  from = "/rules"
+  to = "/"
+  status = 200
+
+[[redirects]]
+  from = "/games"  
+  to = "/?action=games"
+  status = 200
+
+# SEO redirects
+[[redirects]]
+  from = "/ferengi-rules"
+  to = "/"
+  status = 301
+
+[[redirects]]
+  from = "/rules-of-acquisition"
+  to = "/"
+  status = 301
+
+# Headers
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Robots-Tag = "index, follow"

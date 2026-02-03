@@ -1,22 +1,27 @@
 // Service Worker for Latinum Logic | Ferengi Rule Oracle
-const CACHE_NAME = 'latinum-logic-v1';
+const CACHE_NAME = 'latinum-logic-v2';
 const ASSETS = [
-  '/',
-  '/index.html',
-  '/styles.css',
-  '/game-styles.css',
-  '/games.js',
-  '/dashboard.js',
-  '/daily-challenges.js',
-  '/enhanced-reveals.js',
-  '/enhanced-visuals.js',
-  '/animations.js',
-  '/particles.js',
-  '/themes.js',
-  '/sound-system.js',
-  '/achievement-system.js',
-  '/easter-eggs.js',
-  '/manifest.json'
+  './',
+  './index.html',
+  './styles.css',
+  './game-styles.css',
+  './games.js',
+  './dashboard.js',
+  './daily-challenges.js',
+  './enhanced-reveals.js',
+  './enhanced-visuals.js',
+  './animations.js',
+  './particles.js',
+  './themes.js',
+  './sound-system.js',
+  './achievement-system.js',
+  './easter-eggs.js',
+  './manifest.json',
+  './robots.txt',
+  './sitemap.xml',
+  './icon-192.png',
+  './icon-512.png',
+  './favicon.ico'
 ];
 
 // Install: cache all static assets
@@ -60,7 +65,7 @@ self.addEventListener('fetch', event => {
     }).catch(() => {
       // Offline fallback for navigation requests
       if (event.request.mode === 'navigate') {
-        return caches.match('/index.html');
+        return caches.match('./index.html');
       }
     })
   );
