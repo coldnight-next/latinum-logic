@@ -268,6 +268,10 @@ class EnhancedRevealSystem {
       .rule-card-3d {
         transform-style: preserve-3d;
         transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        position: relative;
+        min-height: 200px;
+        width: 100%;
+        perspective: 1000px;
       }
 
       .rule-card-3d.flipped {
@@ -281,10 +285,72 @@ class EnhancedRevealSystem {
         left: 0;
         width: 100%;
         height: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 1.5rem;
+        background: rgba(12, 8, 18, 0.9);
+        border-radius: 15px;
+        border: 2px solid rgba(255, 231, 149, 0.4);
       }
 
       .rule-card-back {
         transform: rotateY(180deg);
+      }
+
+      .rule-card-back .rule-number {
+        color: var(--latinum);
+        font-family: 'Orbitron', monospace;
+        font-size: 1rem;
+        margin-bottom: 1rem;
+        text-shadow: 0 0 10px rgba(255, 231, 149, 0.5);
+      }
+
+      .rule-card-back .rule-text {
+        color: var(--latinum-bright);
+        font-size: 1.2rem;
+        line-height: 1.6;
+        text-align: center;
+        font-style: italic;
+      }
+
+      /* Mobile fix for 3D transforms */
+      @media (max-width: 768px) {
+        .rule-card-3d {
+          min-height: 180px;
+          transform-style: flat;
+        }
+        
+        .rule-card-3d.flipped {
+          transform: scale(1.02);
+        }
+        
+        .rule-card-front {
+          display: none;
+        }
+        
+        .rule-card-3d.flipped .rule-card-front {
+          display: none;
+        }
+        
+        .rule-card-back {
+          transform: none;
+          position: relative;
+        }
+        
+        .rule-card-back .rule-text {
+          font-size: 1rem;
+        }
+        
+        .reveal-stage {
+          width: 95%;
+          padding: 1rem;
+        }
+        
+        .rule-tease {
+          font-size: 1.2rem;
+        }
       }
 
       .celebration-effects {
@@ -425,7 +491,9 @@ class EnhancedRevealSystem {
   }
 
   async revealRule(rule, targetElement) {
-    if (this.revealPreferences.intensity === 'minimal') {
+    // On mobile or if minimal, use basic reveal for better UX
+    const isMobile = window.innerWidth <= 768;
+    if (this.revealPreferences.intensity === 'minimal' || isMobile) {
       return this.basicReveal(rule, targetElement);
     }
 
